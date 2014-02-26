@@ -1,4 +1,4 @@
-package gorecipies
+package num
 
 // ChiSqrDist computes cumulative probability that Chi^2 could
 // take on a value less than chiSqr with the given number of degrees

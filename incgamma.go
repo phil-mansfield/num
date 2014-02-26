@@ -1,4 +1,4 @@
-package gorecipies
+package num
 
 import (
 	"fmt"
