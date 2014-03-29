@@ -1,5 +1,3 @@
-package vec
-
 /*
 package vec implements basic real-valued vector operations.
 
@@ -51,6 +49,7 @@ vector and use SliceIdx to access vectors instead of using an array of Vectors.
 Unless otherwise stated, all operations support vectors of all sizes and will
 panic if given vectors of different sizes as arguments.
 */
+package vec
 
 import (
 	"math"
