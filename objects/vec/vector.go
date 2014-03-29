@@ -76,9 +76,6 @@ func Dot(v1, v2 Vector) float64 {
 }
 
 // Slice returns a vector corresponding to v[start: end].
-func (v Vector) Slice(start, end int) Vector {
-	return v[start: end]
-}
 
 // IdxSlice returns the vector corresponding to the idxth sub-vector
 // of v which is of length width.
@@ -93,7 +90,7 @@ func (v Vector) IdxSlice(width, idx int) Vector {
 		panic("")
 	}
 
-	return v.Slice(start, end)
+	return v[start: end]
 }
 
 // Add at computes the sum of two vectors and places the result in a
@@ -165,15 +162,6 @@ func (v Vector) Norm() float64 {
 	return math.Sqrt(sum)
 }
 
-// CopyAt copies a given vector to a target vector.
-func (v Vector) CopyAt(target Vector) {
-	if len(v) != len(target) {
-		panic("")
-	}
-	
-	copy(v, target)
-}
-
 // NormalizeAt computes a norm-1 vector which points in the same direction as
 // a given vector and places the result in a target vector.
 func (v Vector) NormalizeAt(target Vector) {
@@ -198,13 +186,6 @@ func (v Vector) ScaleAt(scaler float64, target Vector) {
 	for i := 0; i < len(v); i++ {
 		target[i] = v[i] / scaler
 	}
-}
-
-// Copy returns a copy of the given vector.
-func (v Vector) Copy() Vector {
-	target := make([]float64, len(v))
-	v.CopyAt(target)
-	return target
 }
 
 // Normalize returns a norm-1 vector which points in the same direction as
