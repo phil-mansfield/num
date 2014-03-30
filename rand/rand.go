@@ -3,7 +3,12 @@ package rand
 import (
 	"math"
 	"time"
+	
+	"github.com/phil-mansfield/num/objects/vec"
+	"github.com/phil-mansfield/num/objects/geom"
 )
+
+// TODO: Checker whether or not we get faster runtimes with inheritance.
 
 type generatorBackend interface {
 	Init(seed uint64)
@@ -21,6 +26,8 @@ const (
 	MultiplyWithCarry
 	Tausworthe
 	GslRand
+
+	Default = Tausworthe
 )
 
 func NewTimeSeed(gt GeneratorType) *Generator {
@@ -60,9 +67,70 @@ func (gen *Generator) Uniform(low, high float64) float64 {
 }
 
 // Inclusive on the upper bound.
-func (gen *Generator) UniformInt(low, high int64) int64 {
+func (gen *Generator) UniformInt(low, high int) int {
 	unif := gen.Uniform(0, float64(high - low + 1))
-	return low + int64(unif)
+	return low + int(unif)
+}
+
+func (gen *Generator) FinitePlaneAt(plane *geom.FinitePlane, target vec.Vector) {
+	if len(plane.Normal) != len(target) {
+		panic("")
+	}
+
+	x := gen.Uniform(0, plane.Width)
+	y := gen.Uniform(0, plane.Height)
+
+	xVec := plane.CoplanarX.Scale(x)
+	plane.CoplanarY.ScaleAt(y, target)
+	vec.AddAt(xVec, target, target)
+	vec.AddAt(plane.Anchor, target, target)
+}
+
+func (gen *Generator) FiniteLineAt(line *geom.FiniteLine, target vec.Vector) {
+	if len(line.Normal) != len(target) {
+		panic("")
+	}
+
+	s := gen.Uniform(0, line.Length)
+	line.Normal.ScaleAt(s, target)
+	vec.AddAt(line.Anchor, target, target)
+}
+
+func (gen *Generator) FinitePlane(plane *geom.FinitePlane) vec.Vector {
+	target := make([]float64, len(plane.Normal))
+	gen.FinitePlaneAt(plane, target)
+	return target
+}
+
+func (gen *Generator) FiniteLine(line *geom.FiniteLine) vec.Vector {
+	target := make([]float64, len(line.Normal))
+	gen.FiniteLineAt(line, target)
+	return target
+}
+
+func (gen *Generator) SphereAt(radius float64, target vec.Vector) {
+	if len(target) != 3 {
+		panic("")
+	}
+
+	sqrSum := 2.0
+	var x, y float64
+	for sqrSum >= 1 {
+		x = gen.Uniform(-1, 1)
+		y = gen.Uniform(-1, 1)
+		sqrSum = x * x + y * y
+	}
+	s := math.Sqrt(1 - sqrSum)
+
+	target[0] = radius * 2 * x * s
+	target[1] = radius * 2 * y * s
+	target[2] = radius * 1 - 2 * sqrSum
+}
+
+func (gen *Generator) Sphere(radius float64) vec.Vector {
+	target := make([]float64, 3)
+	gen.SphereAt(radius, target)
+	return target
 }
 
 // It would be possible to get rid of about half our calls to gen.Next()
@@ -78,17 +146,21 @@ func (gen *Generator) Gaussian(mu, sigma float64) float64 {
 }
 
 // In the range [0, n). Lovingly adapted from rand.Perm().
-func (gen *Generator) Permutation(n int64) []int64 {
-	seq := make([]int64, n)
-
-	for i, _ := range seq {
-		seq[i] = int64(i)
+func (gen *Generator) PermutationAt(n int, target []int) []int {
+	for i, _ := range target {
+		target[i] = i
 	}
 
-	for i, _ := range seq {
-		j := gen.UniformInt(0, int64(i))
-		seq[i], seq[j] = seq[j], seq[i]
+	for i, _ := range target {
+		j := gen.UniformInt(0, i)
+		target[i], target[j] = target[j], target[i]
 	}
 
-	return seq
+	return target
+}
+
+func (gen *Generator) Permutation(n int) []int {
+	target := make([]int, n)
+	gen.PermutationAt(n, target)
+	return target
 }

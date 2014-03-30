@@ -14,14 +14,14 @@ func ChiSqrDist(chiSqr float64, nu int) float64 {
 // ChiSqr calculates the Chi^2 value and the cumulative pdf of that value
 // occuring for a set of outcomes which have a probability probs[i] of
 // occuring and have occured counts[i] times.
-func ChiSqr(counts []int64, probs []float64) (chiSqr, prob float64) {
+func ChiSqr(counts []int, probs []float64) (chiSqr, prob float64) {
 	if len(counts) <= 1 {
 		panic("|counts| <= 1 in ChiSqr.")
 	} else if len(counts) != len(probs) {
 		panic("|counts| != |probs| in ChiSqr")
 	}
 
-	n := int64(0)
+	n := 0
 	for _, count := range counts {
 		n += count
 	}
