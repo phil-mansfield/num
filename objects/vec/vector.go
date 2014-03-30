@@ -61,6 +61,27 @@ import (
 // Vector is implemented as a simple slice to allow for ease of conversion.
 type Vector []float64
 
+// FromAngles converts a radius and a set of angles into a 2-dimensional or
+// 3-dimensional vector.
+//
+// If one angle is given, it is taken to be the vector's azimuthal angle, phi,
+// from the x-axis. If two angles are given, the first is taken to be the vector's
+// polar angle, theta, from the z-axis and the second is taken to be the vector's
+// azimuthal angle, phi, from the x-axis.
+func FromAngles(r float64, angles []float64) Vector {
+	if len(angles) == 1 {
+		// Cylindircal
+		return []float64{ math.Cos(angles[0]), math.Sin(angles[0]) }
+	} else if len(angles) == 2 {
+		// Spherical
+		return []float64{ r * math.Sin(angles[0]) * math.Cos(angles[1]),
+			r * math.Sin(angles[0]) * math.Cos(angles[1]),
+			r * math.Cos(angles[0])}
+	} else {
+		panic("FromAngles currently only supports 2 and 3-vectors")
+	}
+}
+
 // Dot computes the dot product of two vectors.
 func Dot(v1, v2 Vector) float64 {
 	if len(v1) != len(v2) {
@@ -166,6 +187,7 @@ func (v Vector) Norm() float64 {
 // a given vector and places the result in a target vector.
 func (v Vector) NormalizeAt(target Vector) {
 	if len(target) != len(v) {
+		println(len(target), len(v))
 		panic("")
 	}
 
