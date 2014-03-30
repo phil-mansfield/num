@@ -34,7 +34,7 @@ func NewLine(anchor, normal vec.Vector) *Line {
 
 	line := new(Line)
 	copy(line.Anchor, anchor)
-	normal.NormalizeAt(line.Normal)
+	line.Normal = normal.Normalize()
 	return line
 }
 
@@ -44,8 +44,9 @@ func NewFiniteLine(anchor, normal vec.Vector, length float64) *FiniteLine {
 	}
 
 	line := new(FiniteLine)
+	line.Anchor = make([]float64, len(anchor))
 	copy(line.Anchor, anchor)
-	normal.NormalizeAt(line.Normal)
+	line.Normal = normal.Normalize()
 
 	if length < 0 {
 		line.Length = length * -1
@@ -63,8 +64,9 @@ func NewPlane(anchor, normal vec.Vector) *Plane {
 	}
 
 	plane := new(Plane)
+	plane.Anchor = make([]float64, len(anchor))
 	copy(plane.Anchor, anchor)
-	normal.NormalizeAt(plane.Anchor)
+	plane.Normal = normal.Normalize()
 	plane.anchorDotNormal = vec.Dot(plane.Anchor, plane.Normal)
 
 	return plane
@@ -78,9 +80,9 @@ func NewFinitePlane(anchor, coplanarX, coplanarY vec.Vector, width, height float
 	plane := new(FinitePlane)
 	plane.Width = width
 	plane.Height = height
-	coplanarX.NormalizeAt(plane.CoplanarX)
-	coplanarY.NormalizeAt(plane.CoplanarY)
-	vec.CrossAt(plane.CoplanarX, plane.CoplanarY, plane.Normal)
+	plane.CoplanarX = coplanarX.Normalize()
+	plane.CoplanarY = coplanarY.Normalize()
+	plane.Normal = vec.Cross(plane.CoplanarX, plane.CoplanarY)
 
 	// If coplanarX and coplanarY are colinear, we'll have issues.
 	if num.AlmostEqual(0.0, plane.Normal.Norm()) {
