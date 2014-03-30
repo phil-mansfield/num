@@ -4,6 +4,7 @@ import (
 	"math"
 	"time"
 	
+	"github.com/phil-mansfield/num"
 	"github.com/phil-mansfield/num/objects/vec"
 	"github.com/phil-mansfield/num/objects/geom"
 )
@@ -17,6 +18,8 @@ type generatorBackend interface {
 
 type Generator struct {
 	backend generatorBackend
+	savedGaussian bool
+	nextGaussianDx float64
 }
 
 type GeneratorType uint8
@@ -53,7 +56,7 @@ func New(gt GeneratorType, seed uint64) *Generator {
 	}
 
 	backend.Init(seed)
-	gen := &Generator{ backend }
+	gen := &Generator{ backend, false, -1 }
 	return gen
 }
 
@@ -133,15 +136,36 @@ func (gen *Generator) Sphere(radius float64) vec.Vector {
 	return target
 }
 
+func (gen *Generator) MonteCarlo(f num.Func1D, lowX, highX, lowY, highY float64) float64 {
+	for {
+		x := gen.Uniform(lowX, highX)
+		y := gen.Uniform(lowY, highY)
+
+		if y < f(x) { return x }
+	}
+}
+
 // It would be possible to get rid of about half our calls to gen.Next()
 // here, by storing math.Sin(gen.Uniform(0, 2 * math.Pi)) * radius
 // (same Uniform as in dx calculation) somewhere. We may also want to
 // check whether or not it's faster to just monte-carlo our way into
 // a circle instead of using cos and sin.
 func (gen *Generator) Gaussian(mu, sigma float64) float64 {
+	if gen.savedGaussian {
+		gen.savedGaussian = false
+		return mu + sigma * gen.nextGaussianDx
+	}
+
 	// We subtract from 1 because our range is [0, 1)
 	radius := math.Sqrt(-2.0 * math.Log(1.0 - gen.backend.Next()))
-	dx := math.Cos(gen.Uniform(0, 2 * math.Pi)) * radius
+	theta := gen.backend.Next() * 2 * math.Pi
+	cosTheta := math.Cos(theta)
+	sinTheta := math.Sin(theta)
+	dx := cosTheta * radius
+	dy := sinTheta * radius    
+
+	gen.savedGaussian = true
+	gen.nextGaussianDx = dy
 	return mu + sigma * dx
 }
 
