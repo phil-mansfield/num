@@ -14,6 +14,7 @@ func frequencyTest(gen *Generator, d, iters int) float64 {
 	for i, _ := range probs {
 		probs[i] = 1 / float64(d)
 	}
+
 	_, prob := num.ChiSqr(bins, probs)
 	return prob
 }

@@ -61,7 +61,33 @@ import (
 // Vector is implemented as a simple slice to allow for ease of conversion.
 type Vector []float64
 
-// FromAngles converts a radius and a set of angles into a 2-dimensional or
+// FromAnglesAt converts a radius and a set of angles into a 2-dimensional or
+// 3-dimensional vector and places the result in a target vector.
+//
+// If one angle is given, it is taken to be the vector's azimuthal angle, phi,
+// from the x-axis. If two angles are given, the first is taken to be the vector's
+// polar angle, theta, from the z-axis and the second is taken to be the vector's
+// azimuthal angle, phi, from the x-axis.
+func FromAnglesAt(r float64, angles []float64, target Vector) {
+	if len(target) != len(angles) + 1 {
+		panic("")
+	}
+
+	if len(angles) == 1 {
+		// Cylindircal
+		target[0] = math.Cos(angles[0])
+		target[1] = math.Sin(angles[0])
+	} else if len(angles) == 2 {
+		// Spherical
+		target[0] = r * math.Sin(angles[0]) * math.Cos(angles[1])
+		target[1] =	r * math.Sin(angles[0]) * math.Cos(angles[1])
+		target[2] = r * math.Cos(angles[0])
+	} else {
+		panic("FromAngles currently only supports 2 and 3-vectors")
+	}
+}
+
+// FromAnglesAt converts a radius and a set of angles into a 2-dimensional or
 // 3-dimensional vector.
 //
 // If one angle is given, it is taken to be the vector's azimuthal angle, phi,
@@ -69,17 +95,9 @@ type Vector []float64
 // polar angle, theta, from the z-axis and the second is taken to be the vector's
 // azimuthal angle, phi, from the x-axis.
 func FromAngles(r float64, angles []float64) Vector {
-	if len(angles) == 1 {
-		// Cylindircal
-		return []float64{ math.Cos(angles[0]), math.Sin(angles[0]) }
-	} else if len(angles) == 2 {
-		// Spherical
-		return []float64{ r * math.Sin(angles[0]) * math.Cos(angles[1]),
-			r * math.Sin(angles[0]) * math.Cos(angles[1]),
-			r * math.Cos(angles[0])}
-	} else {
-		panic("FromAngles currently only supports 2 and 3-vectors")
-	}
+	target := make([]float64, len(angles) + 1)
+	FromAnglesAt(r, angles, target)
+	return target
 }
 
 // Dot computes the dot product of two vectors.
