@@ -33,6 +33,7 @@ func NewLine(anchor, normal vec.Vector) *Line {
 	}
 
 	line := new(Line)
+	line.Anchor = make([]float64, len(anchor))
 	copy(line.Anchor, anchor)
 	line.Normal = normal.Normalize()
 	return line
@@ -92,20 +93,24 @@ func NewFinitePlane(anchor, coplanarX, coplanarY vec.Vector, width, height float
 	return plane
 }
 
-func PlaneIntersectionAt(plane *Plane, line *Line, target vec.Vector) {
+// This should maybe be a plane method.
+func PlaneIntersectionAt(plane *Plane, line *Line, target vec.Vector) float64 {
 	dist := (plane.anchorDotNormal - vec.Dot(line.Anchor, plane.Normal)) /
 		vec.Dot(line.Normal, plane.Normal)
 
+	if target == nil { return dist }
+
 	line.Normal.ScaleAt(dist, target)
 	vec.Add(line.Anchor, target)
+	return dist
 }
 
-func PlaneIntersection(plane *Plane, line *Line) vec.Vector {
+func PlaneIntersection(plane *Plane, line *Line) (vec.Vector, float64) {
 	if len(line.Anchor) != len(plane.Anchor) {
 		panic("")
 	}
 
 	target := make([]float64, len(line.Anchor))
-	PlaneIntersectionAt(plane, line, target)
-	return target
+	dist := PlaneIntersectionAt(plane, line, target)
+	return target, dist
 }
