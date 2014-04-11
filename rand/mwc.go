@@ -45,5 +45,7 @@ func (gen *multiplyWithCarryGenerator) Next() float64 {
 		gen.c++
 	}
 	gen.seq[gen.i] = mwcR - x
-	return float64(gen.seq[gen.i]) / mwcMaxUint
+	res := float64(gen.seq[gen.i]) / mwcMaxUint
+	if res == 1.0 { return gen.Next() }
+	return res
 }

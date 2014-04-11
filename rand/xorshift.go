@@ -23,5 +23,7 @@ func (gen *xorshiftGenerator) Next() float64 {
 	t := gen.x ^ (gen.x << 11)
 	gen.x, gen.y, gen.z = gen.y, gen.z, gen.w
 	gen.w = gen.w ^ (gen.w >> 19) ^ (t ^ (t >> 8))
-	return float64(gen.w) / xorshiftMaxUint
+	res := float64(math.MaxUint32 - gen.w) / xorshiftMaxUint
+	if res == 1.0 { return gen.Next() }
+	return res
 }

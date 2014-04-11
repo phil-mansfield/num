@@ -6,6 +6,8 @@ import (
 	"github.com/phil-mansfield/num/objects/geom"
 )
 
+// This really sucks. Rewrite all of it.
+
 func BenchmarkTauswortheNext(b *testing.B) {
 	rand := NewTimeSeed(Tausworthe)
 
@@ -18,7 +20,7 @@ func BenchmarkTauswortheNext(b *testing.B) {
 }
 
 func BenchmarkGoRandNext(b *testing.B) {
-	rand := NewTimeSeed(GoRand)
+	rand := NewTimeSeed(Golang)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -50,8 +52,19 @@ func BenchmarkMultiplyWithCarryNext(b *testing.B) {
 	}
 }
 
-func BenchmarkGslRandNext(b *testing.B) {
-	rand := NewTimeSeed(GslRand)
+func BenchmarkGslNext(b *testing.B) {
+	rand := NewTimeSeed(Gsl)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = rand.Uniform(0, 2)
+	}
+}
+
+func BenchmarkSysNext(b *testing.B) {
+	rand := NewTimeSeed(Sys)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -99,21 +112,6 @@ func BenchmarkFiniteLineAt(b *testing.B) {
 	}
 }
 
-
-func TestFrequncyTausworthe(t *testing.T) {
-	rand := NewTimeSeed(Tausworthe)
-	chis := FrequencyTest(rand, 10, 1000 * 1000, 5)
-	badCount := 0
-	for _, chi := range chis {
-		if chi < 0.05 || chi > 0.95 {
-			badCount += 1
-		}
-	}
-	if badCount >= 2 {
-		t.Errorf("Got Chi^2 values of %v", chis)
-	}
-}
-
 func randomEnough(chis []float64) bool {
 	badCount := 0
 	for _, chi := range chis {
@@ -121,61 +119,69 @@ func randomEnough(chis []float64) bool {
 			badCount += 1
 		}
 	}
-	return badCount < len(chis)
+	return badCount < 3
+}
+
+func TestFrequncyTausworthe(t *testing.T) {
+	rand := NewTimeSeed(Tausworthe)
+	chis, ps := FrequencyTest(rand, 12, 3 * 7 * 1000 * 1000, 7)
+	if !randomEnough(ps) {
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
+	}
 }
 
 func TestFrequncyGoRand(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := FrequencyTest(rand, 12, 5 * 1000 * 1000, 4)
-	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+	rand := NewTimeSeed(Golang)
+	chis, ps := FrequencyTest(rand, 12, 7 * 3 * 1000 * 1000, 7)
+	if !randomEnough(ps) {
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestFrequncyXorshift(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := FrequencyTest(rand, 12, 5 * 1000 * 1000, 4)
-	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+	rand := NewTimeSeed(Xorshift)
+	chis, ps := FrequencyTest(rand, 12, 7 * 3 * 1000 * 1000, 7)
+	if !randomEnough(ps) {
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestFrequncyMultiplyWithCarry(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := FrequencyTest(rand, 12, 5 * 1000 * 1000, 4)
-	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+	rand := NewTimeSeed(MultiplyWithCarry)
+	chis, ps := FrequencyTest(rand, 12, 7 * 3 * 1000 * 1000, 7)
+	if !randomEnough(ps) {
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestSerialTausworthe(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := SerialTest(rand, 8, 5 * 1000 * 1000, 4)
+	rand := NewTimeSeed(Tausworthe)
+	ps, chis := SerialTest(rand, 5, 25 * 7 * 1000 * 1000, 7)
 	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestSerialGoRand(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := SerialTest(rand, 8, 5 * 1000 * 1000, 4)
+	rand := NewTimeSeed(Golang)
+	ps, chis := SerialTest(rand, 5, 25 * 7 * 1000 * 1000, 7)
 	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestSerialXorshift(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := SerialTest(rand, 8, 5 * 1000 * 1000, 4)
+	rand := NewTimeSeed(Xorshift)
+	ps, chis := SerialTest(rand, 5, 25 * 7 * 1000 * 1000, 7)
 	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }
 
 func TestSerialMultiplyWithCarry(t *testing.T) {
-	rand := NewTimeSeed(GoRand)
-	chis := SerialTest(rand, 8, 5 * 1000 * 1000, 4)
+	rand := NewTimeSeed(MultiplyWithCarry)
+	ps, chis := SerialTest(rand, 5, 25 * 7 * 1000 * 1000, 7)
 	if !randomEnough(chis) {
-		t.Errorf("Got Chi^2 values of %v", chis)
+		t.Errorf("Got p(Chi^2) values of %v\n Chi^2 of", ps, chis)
 	}
 }

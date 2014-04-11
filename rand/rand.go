@@ -5,11 +5,7 @@ import (
 	"time"
 	
 	"github.com/phil-mansfield/num"
-	"github.com/phil-mansfield/num/objects/vec"
-	"github.com/phil-mansfield/num/objects/geom"
 )
-
-// TODO: Checker whether or not we get faster runtimes with inheritance.
 
 type generatorBackend interface {
 	Init(seed uint64)
@@ -25,10 +21,11 @@ type Generator struct {
 type GeneratorType uint8
 const (
 	Xorshift GeneratorType = iota
-	GoRand
+	Golang
 	MultiplyWithCarry
 	Tausworthe
-	GslRand
+	Gsl
+	Sys
 
 	Default = Tausworthe
 )
@@ -43,14 +40,16 @@ func New(gt GeneratorType, seed uint64) *Generator {
 	switch(gt) {
 	case Xorshift:
 		backend = new(xorshiftGenerator)
-	case GoRand:
+	case Golang:
 		backend = new(goRandGenerator)
 	case MultiplyWithCarry:
 		backend = new(multiplyWithCarryGenerator)
 	case Tausworthe:
 		backend = new(tauswortheGenerator)
-	case GslRand:
+	case Gsl:
 		backend = new(gslRandGenerator)
+	case Sys:
+		backend = new(sysRandGenerator)
 	default:
 		panic("Unrecognized GeneratorType")
 	}
@@ -73,67 +72,6 @@ func (gen *Generator) Uniform(low, high float64) float64 {
 func (gen *Generator) UniformInt(low, high int) int {
 	unif := gen.Uniform(0, float64(high - low + 1))
 	return low + int(unif)
-}
-
-func (gen *Generator) FinitePlaneAt(plane *geom.FinitePlane, target vec.Vector) {
-	if len(plane.Normal) != len(target) {
-		panic("")
-	}
-
-	x := gen.Uniform(0, plane.Width)
-	y := gen.Uniform(0, plane.Height)
-
-	xVec := plane.CoplanarX.Scale(x)
-	plane.CoplanarY.ScaleAt(y, target)
-	vec.AddAt(xVec, target, target)
-	vec.AddAt(plane.Anchor, target, target)
-}
-
-func (gen *Generator) FiniteLineAt(line *geom.FiniteLine, target vec.Vector) {
-	if len(line.Normal) != len(target) {
-		panic("")
-	}
-
-	s := gen.Uniform(0, line.Length)
-	line.Normal.ScaleAt(s, target)
-	vec.AddAt(line.Anchor, target, target)
-}
-
-func (gen *Generator) FinitePlane(plane *geom.FinitePlane) vec.Vector {
-	target := make([]float64, len(plane.Normal))
-	gen.FinitePlaneAt(plane, target)
-	return target
-}
-
-func (gen *Generator) FiniteLine(line *geom.FiniteLine) vec.Vector {
-	target := make([]float64, len(line.Normal))
-	gen.FiniteLineAt(line, target)
-	return target
-}
-
-func (gen *Generator) SphereAt(radius float64, target vec.Vector) {
-	if len(target) != 3 {
-		panic("")
-	}
-
-	sqrSum := 2.0
-	var x, y float64
-	for sqrSum >= 1 {
-		x = gen.Uniform(-1, 1)
-		y = gen.Uniform(-1, 1)
-		sqrSum = x * x + y * y
-	}
-	s := math.Sqrt(1 - sqrSum)
-
-	target[0] = radius * 2 * x * s
-	target[1] = radius * 2 * y * s
-	target[2] = radius * 1 - 2 * sqrSum
-}
-
-func (gen *Generator) Sphere(radius float64) vec.Vector {
-	target := make([]float64, 3)
-	gen.SphereAt(radius, target)
-	return target
 }
 
 func (gen *Generator) MonteCarlo(f num.Func1D, lowX, highX, lowY, highY float64) float64 {

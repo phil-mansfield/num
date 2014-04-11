@@ -16,7 +16,7 @@ type tauswortheGenerator struct {
 func (gen *tauswortheGenerator) Init(seed uint64) {
 	gen.seq = make([]float64, tauswortheSeqLen)
 
-	digitGen := New(GoRand, seed)
+	digitGen := New(Golang, seed)
 
 	f := 1.0
 	for digit := 0; digit < tauswortheDigitsRandomized; digit++ {
