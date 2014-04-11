@@ -114,8 +114,8 @@ func main() {
 			lowFluxSum += flux * binWidth
 		}
 
-		// fmt.Printf("%15.6g %15.6g %15.6g %15.6g\n",
-		// 	x, E, percentBins[i], sum)
+		fmt.Printf("%15.6g %15.6g %15.6g %15.6g\n",
+		 	x, E, percentBins[i], sum)
 	}
 	println("Full range measured flux:", measuredFluxSum)
 	println("Actual in-range flux:", lowFluxSum)

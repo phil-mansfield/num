@@ -52,6 +52,7 @@ panic if given vectors of different sizes as arguments.
 package vec
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -60,6 +61,24 @@ import (
 //
 // Vector is implemented as a simple slice to allow for ease of conversion.
 type Vector []float64
+
+func (vec Vector) Print(fmtStr string) {
+	fmt.Print("[")
+	for i := 0; i < len(vec); i++ {
+		fmt.Printf(fmtStr, vec[i])
+		if i != len(vec) - 1 { fmt.Printf(", ") }
+	}
+	fmt.Print("]")
+}
+
+func (vec Vector) Println(fmtStr string) {
+	fmt.Print("[")
+	for i := 0; i < len(vec); i++ {
+		fmt.Printf(fmtStr, vec[i])
+		if i != len(vec) - 1 { fmt.Printf(", ") }
+	}
+	fmt.Println("]")
+}
 
 // FromAnglesAt converts a radius and a set of angles into a 2-dimensional or
 // 3-dimensional vector and places the result in a target vector.
@@ -80,7 +99,7 @@ func FromAnglesAt(r float64, angles []float64, target Vector) {
 	} else if len(angles) == 2 {
 		// Spherical
 		target[0] = r * math.Sin(angles[0]) * math.Cos(angles[1])
-		target[1] =	r * math.Sin(angles[0]) * math.Cos(angles[1])
+		target[1] =	r * math.Sin(angles[0]) * math.Sin(angles[1])
 		target[2] = r * math.Cos(angles[0])
 	} else {
 		panic("FromAngles currently only supports 2 and 3-vectors")
@@ -224,7 +243,7 @@ func (v Vector) ScaleAt(scaler float64, target Vector) {
 	}
 
 	for i := 0; i < len(v); i++ {
-		target[i] = v[i] / scaler
+		target[i] = v[i] * scaler
 	}
 }
 

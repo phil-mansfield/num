@@ -101,7 +101,7 @@ func PlaneIntersectionAt(plane *Plane, line *Line, target vec.Vector) float64 {
 	if target == nil { return dist }
 
 	line.Normal.ScaleAt(dist, target)
-	vec.Add(line.Anchor, target)
+	vec.AddAt(line.Anchor, target, target)
 	return dist
 }
 

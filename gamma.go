@@ -73,9 +73,9 @@ func incGammaSeries(a, x float64) float64 {
 	panic(fmt.Sprintf(fmtStr, a, x))
 }
 
-// IncompleteGamma computes the incomplete gamma function,
+// IncompleteGamma computes the normalized incomplete gamma function,
 //
-// P(a, x) =  gamma(a, x)/ Gamma(a),
+// IncGamma(a, x) =  gamma(a, x) / Gamma(a),
 //
 // gamma(a, x) = int_0^x dt t^(a-1) exp(-t),
 // Gamma(a) = int_0^inf dt t^(a-1) exp(-t).
@@ -86,7 +86,7 @@ func IncGamma(a, x float64) float64 {
 	}
 
 	if x < a + 1 {
-		return 1 - incGammaSeries(a, x)
+		return incGammaSeries(a, x)
 	} else { // x >= a + 1
 		// Continued fraction converges more quickly in this range
 		return 1 - incGammaContinuedFraction(a, x)
