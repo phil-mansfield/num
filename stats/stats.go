@@ -1,6 +1,6 @@
 /*
 Package stats is a collection of basic statistical tests which can be performed
-upon float64 arrays.
+upon float64 arrays. It also implements a histogram.
 
 All operations will panic if given an array of length 0 or an array containing a NaN.
 Some operations have additional panic conditions.
