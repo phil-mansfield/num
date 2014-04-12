@@ -172,7 +172,8 @@ func NewBoundedHistogram(xs []float64, binNum int, low, high float64) (*Histogra
 	if binNum < 1 {
 		panic(fmt.Sprintf("stats.NewBoundedHistogram given binNum of %d",
 			binNum))
-	} else if low >= high || math.IsInf(low, 0) || math.IsInf(high, 0) {
+	} else if low >= high || math.IsInf(low, 0) || math.IsInf(high, 0) ||
+		math.IsNaN(low) || math.IsNaN(high) {
 		panic(fmt.Sprintf("stats.NewBoundedHistogram given range [%d, %d]",
 			low, high))
 	}
@@ -210,7 +211,8 @@ func NewBoundedHistogram(xs []float64, binNum int, low, high float64) (*Histogra
 func NewBoundedLogHistogram(xs []float64, binNum int, low, high float64) (*Histogram, int) {
 	if binNum < 1 {
 		panic(fmt.Sprintf("stats.NewBoundedLogHistogram given binNum of %d", binNum))
-	} else if low >= high || low <= 0 || math.IsInf(low, 0) || math.IsInf(high, 0) {
+	} else if low >= high || low <= 0 || math.IsInf(low, 0) ||
+		math.IsInf(high, 0) || math.IsNaN(low) || math.IsNaN(high) {
 		panic(fmt.Sprintf("stats.NewBoundedLogHistogram given range [%d, %d]", low, high))
 	}
 
