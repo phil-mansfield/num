@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -30,6 +31,7 @@ type Histogram struct {
 func (hist *Histogram) Add(x float64) int {
 	var idx int
 
+	if math.IsNaN(x) { panic("stats.Histogram.Add() given NaN.") }
 	if hist.logHistogram { x = math.Log(x) }
 
 	if x == hist.highLim {
@@ -51,7 +53,10 @@ func (hist *Histogram) AddArray(xs []float64) int {
 	var idx int
 	initialValueCount := 0
 
-	for _, x := range xs {
+	for i, x := range xs {
+		if math.IsNaN(x) { 
+			panic(fmt.Sprintf("stats.Histogram.AddArray() given NaN at index %d", i))
+		}
 		if hist.logHistogram { x = math.Log(x) }
 
 		if x == hist.highLim {
@@ -98,7 +103,16 @@ func (hist *Histogram) CumulativeBins() []int {
 // NewHistogram creates a Histogram instance out of the given array of values
 // with the given number of bins. The minimum and maximum allowed values are
 // taken to be the minimum and maximum values in that array.
+//
+// NewHistogram will panic if given a non-positive number of bins or less than
+// two starting values, as either option leads to an ill-defined range.
 func NewHistogram(xs []float64, binNum int) *Histogram {
+	if len(xs) <= 1 {
+		panic("stats.NewHistogram given empty array.")
+	} else if binNum < 1 {
+		panic(fmt.Sprintf("stats.NewHistogram given binNum of %d", binNum))
+	}
+
 	as := Describe(xs)
 	min, max := as.Min, as.Max
 	hist, _ := NewBoundedHistogram(xs, binNum, min, max)
@@ -109,7 +123,16 @@ func NewHistogram(xs []float64, binNum int) *Histogram {
 // with the given number of bins. Logarithms of bin centers are uniformly
 // distributed. The minimum and maximum allowed values are taken to be the
 // minimum and maximum values in that array.
+//
+// NewLogHistogram will panic if given a non-positive number of bins or less than
+// two starting values, as either option leads to an ill-defined range.
 func NewLogHistogram(xs []float64, binNum int) *Histogram {
+	if len(xs) <= 1 {
+		panic("stats.NewLogHistogram given empty array.")
+	} else if binNum < 1 {
+		panic(fmt.Sprintf("stats.NewLogHistogram given binNum of %d", binNum))
+	}
+
 	as := Describe(xs)
 	min, max := as.Min, as.Max
 	hist, _ := NewBoundedLogHistogram(xs, binNum, min, max)
@@ -121,6 +144,15 @@ func NewLogHistogram(xs []float64, binNum int) *Histogram {
 // values outside of these limits are ignored. The returned integer is the
 // number of such ignored values.
 func NewBoundedHistogram(xs []float64, binNum int, low, high float64) (*Histogram, int) {
+	if binNum < 1 {
+		panic(fmt.Sprintf("stats.NewBoundedHistogram given binNum of %d",
+			binNum))
+	} else if low >= high {
+		panic(fmt.Sprintf("stats.NewBoundedHistogram given range [%d, %d]",
+			low, high))
+	}
+
+
 	hist := new(Histogram)
 	hist.Bins = make([]int, binNum)
 	hist.BinValues = make([]float64, binNum)
@@ -148,6 +180,14 @@ func NewBoundedHistogram(xs []float64, binNum int, low, high float64) (*Histogra
 // values outside of these limits are ignored. The returned integer is the
 // number of such ignored values.
 func NewBoundedLogHistogram(xs []float64, binNum int, low, high float64) (*Histogram, int) {
+	if binNum < 1 {
+		panic(fmt.Sprintf("stats.NewBoundedLogHistogram given binNum of %d",
+			binNum))
+	} else if low >= high {
+		panic(fmt.Sprintf("stats.NewBoundedLogHistogram given range [%d, %d]",
+			low, high))
+	}
+
 	hist := new(Histogram)
 	hist.Bins = make([]int, binNum)
 	hist.BinValues = make([]float64, binNum)
