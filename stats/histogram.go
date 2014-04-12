@@ -15,23 +15,36 @@ type Histogram struct {
 }
 
 func (hist *Histogram) Add(x float64) int {
+	var idx int
+
 	if hist.logHistogram { x = math.Log(x) }
-	if x == hist.highLim { hist.Bins[len(hist.Bins) - 1]++ }
-	idx := int((x - hist.lowLim) / hist.binWidth)
-	if idx < 0 || idx >= len(hist.Bins) { return 1 }
+
+	if x == hist.highLim {
+		idx = len(hist.Bins) - 1
+	} else {
+		idx = int((x - hist.lowLim) / hist.binWidth)
+		if idx < 0 || idx >= len(hist.Bins) { return 1 }
+	}
+
 	hist.ItemCount++
 	hist.Bins[idx]++
 	return 0
 }
 
 func (hist *Histogram) AddArray(xs []float64) int {
+	var idx int
 	initialItemCount := 0
 
 	for _, x := range xs {
 		if hist.logHistogram { x = math.Log(x) }
-		if x == hist.highLim { hist.Bins[len(hist.Bins) - 1]++ }
-		idx := int((x - hist.lowLim) / hist.binWidth)
-		if idx < 0 || idx >= len(hist.Bins) { continue }
+
+		if x == hist.highLim {
+			idx = len(hist.Bins) - 1
+		} else {
+			idx = int((x - hist.lowLim) / hist.binWidth)
+			if idx < 0 || idx >= len(hist.Bins) { continue }
+		}
+
 		hist.ItemCount++
 		hist.Bins[idx]++
 	}
