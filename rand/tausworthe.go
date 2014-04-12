@@ -48,3 +48,21 @@ func (gen *tauswortheGenerator) Next() float64 {
 
 	return next
 }
+
+func (gen *tauswortheGenerator) NextSequence(target []float64) {
+	for i := range target {
+		next := gen.seq[gen.firstFollower] - gen.seq[gen.secondFollower]
+		if next < 0 { next += 1.0 }
+		gen.seq[gen.leader] = next
+
+		if gen.leader == 0 { gen.leader = len(gen.seq) }
+		if gen.firstFollower == 0 { gen.firstFollower = len(gen.seq) }
+		if gen.secondFollower == 0 { gen.secondFollower = len(gen.seq) }
+
+		gen.leader--
+		gen.firstFollower--
+		gen.secondFollower--
+
+		target[i] = next
+	}
+}

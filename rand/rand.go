@@ -7,9 +7,14 @@ import (
 	"github.com/phil-mansfield/num"
 )
 
+const (
+	DefaultBufSize = 1<<10
+)
+
 type generatorBackend interface {
 	Init(seed uint64)
-	Next() float64 // In the range [0, 1)
+	Next() float64
+	NextSequence(target []float64)
 }
 
 type Generator struct {
@@ -25,7 +30,6 @@ const (
 	MultiplyWithCarry
 	Tausworthe
 	Gsl
-	Sys
 
 	Default = Tausworthe
 )
@@ -41,15 +45,13 @@ func New(gt GeneratorType, seed uint64) *Generator {
 	case Xorshift:
 		backend = new(xorshiftGenerator)
 	case Golang:
-		backend = new(goRandGenerator)
+		backend = new(golangGenerator)
 	case MultiplyWithCarry:
 		backend = new(multiplyWithCarryGenerator)
 	case Tausworthe:
 		backend = new(tauswortheGenerator)
 	case Gsl:
 		backend = new(gslRandGenerator)
-	case Sys:
-		backend = new(sysRandGenerator)
 	default:
 		panic("Unrecognized GeneratorType")
 	}
@@ -68,6 +70,13 @@ func (gen *Generator) Uniform(low, high float64) float64 {
 	return (gen.backend.Next() * (high - low)) + low
 }
 
+func (gen *Generator) UniformAt(low, high float64, target []float64) {
+	gen.backend.NextSequence(target)
+	for i := 0; i < len(target); i ++ {
+		target[i] = target[i] * (high - low) + low
+	}
+}
+
 // Inclusive on the upper bound.
 func (gen *Generator) UniformInt(low, high int) int {
 	unif := gen.Uniform(0, float64(high - low + 1))
@@ -83,11 +92,6 @@ func (gen *Generator) MonteCarlo(f num.Func1D, lowX, highX, lowY, highY float64)
 	}
 }
 
-// It would be possible to get rid of about half our calls to gen.Next()
-// here, by storing math.Sin(gen.Uniform(0, 2 * math.Pi)) * radius
-// (same Uniform as in dx calculation) somewhere. We may also want to
-// check whether or not it's faster to just monte-carlo our way into
-// a circle instead of using cos and sin.
 func (gen *Generator) Gaussian(mu, sigma float64) float64 {
 	if gen.savedGaussian {
 		gen.savedGaussian = false
@@ -108,7 +112,7 @@ func (gen *Generator) Gaussian(mu, sigma float64) float64 {
 }
 
 // In the range [0, n). Lovingly adapted from rand.Perm().
-func (gen *Generator) PermutationAt(n int, target []int) []int {
+func (gen *Generator) PermutationAt(n int, target []int) {
 	for i, _ := range target {
 		target[i] = i
 	}
@@ -117,8 +121,6 @@ func (gen *Generator) PermutationAt(n int, target []int) []int {
 		j := gen.UniformInt(0, i)
 		target[i], target[j] = target[j], target[i]
 	}
-
-	return target
 }
 
 func (gen *Generator) Permutation(n int) []int {
