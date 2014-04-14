@@ -1,9 +1,11 @@
 package stats
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/phil-mansfield/num"
+	"github.com/phil-mansfield/num/rand"
 )
 
 func floatArrayEq(xs, ys []float64) bool {
@@ -40,7 +42,7 @@ func TestHistogramNewBounded(t *testing.T) {
 	targetBins := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	targetMisses := 0
 
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
 
 	if !floatArrayEq(targetValues, hist.BinValues) { 
 		t.Errorf("Histogram has wrong values: %v, want %v",
@@ -66,7 +68,8 @@ func TestHistogramAddHit(t *testing.T) {
 	targetBins := []int{0, 0, 1, 0, 0, 0, 0, 0, 0, 0}
 	targetMisses := 0
 
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
+
 	hist.Add(-3)
 
 	if !intArrayEq(targetBins, hist.Bins) {
@@ -87,7 +90,8 @@ func TestHistogramAddMaximum(t *testing.T) {
 	targetBins := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
 	targetMisses := 0
 
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
+
 	misses += hist.Add(5)
 
 	if !intArrayEq(targetBins, hist.Bins) {
@@ -109,7 +113,8 @@ func TestHistogramAddMinimum(t *testing.T) {
 	targetBins := []int{1, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	targetMisses := 0
 	
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
+
 	misses += hist.Add(-5)
 	
 	if !intArrayEq(targetBins, hist.Bins) {
@@ -130,7 +135,8 @@ func TestHistogramAddMiss(t *testing.T) {
 	targetBins := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	targetMisses := 2
 
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
+
 	misses += hist.Add(6)
 	misses += hist.Add(-6)
 
@@ -154,7 +160,8 @@ func TestHistogramAddArray(t *testing.T) {
 	
 	values := []float64{-5, 5, -3.5, -6, 6}
 
-	hist, misses := NewBoundedHistogram(empty, 10, -5, +5)
+	hist, misses := new(Histogram).InitBounded(empty, 10, -5, +5)
+
 	misses += hist.AddArray(values)
 
 	if !intArrayEq(targetBins, hist.Bins) {
@@ -167,4 +174,42 @@ func TestHistogramAddArray(t *testing.T) {
 		t.Errorf("Histogram generated %d misses, want %d",
 			misses, targetMisses)
 	}
+}
+
+func BenchmarkAddArrayTwice(b *testing.B) {
+	input := make([]float64, b.N)
+	gen := rand.NewTimeSeed(rand.Xorshift)
+	gen.UniformAt(0, 100, input)
+
+	hist, _ := new(Histogram).InitBounded([]float64{}, 1024, 0, 100)
+
+	b.ResetTimer()
+	hist.AddArray(input)
+	hist.AddArray(input)
+}
+
+func BenchmarkAddTwice(b *testing.B) {
+	input := make([]float64, b.N)
+	gen := rand.NewTimeSeed(rand.Xorshift)
+	gen.UniformAt(0, 100, input)
+
+	hist, _ := new(Histogram).InitBounded([]float64{}, 1024, 0, 100)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hist.Add(input[i])
+	}
+	for i := 0; i < b.N; i++ {
+		hist.Add(input[i])
+	}
+}
+
+func BenchmarkSort(b *testing.B) {
+	input := make([]float64, b.N)
+	gen := rand.NewTimeSeed(rand.Xorshift)
+	gen.UniformAt(0, 100, input)
+
+	b.ResetTimer()
+
+	sort.Float64s(input)
 }
