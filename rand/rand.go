@@ -27,9 +27,9 @@ type GeneratorType uint8
 const (
 	Xorshift GeneratorType = iota
 	Golang
-	MultiplyWithCarry
+	MultiplyWithCarry // Do not use, under intense scrutiny.
 	Tausworthe
-	Gsl
+	Gsl // Do not use, under intense scrutiny.
 
 	Default = Tausworthe
 )
@@ -47,10 +47,12 @@ func New(gt GeneratorType, seed uint64) *Generator {
 	case Golang:
 		backend = new(golangGenerator)
 	case MultiplyWithCarry:
+		println("WARNING: INCORRECT RAND IMPLEMENTATION")
 		backend = new(multiplyWithCarryGenerator)
 	case Tausworthe:
 		backend = new(tauswortheGenerator)
 	case Gsl:
+		println("WARNING: INCORRECT RAND IMPLEMENTATION")
 		backend = new(gslRandGenerator)
 	default:
 		panic("Unrecognized GeneratorType")
