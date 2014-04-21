@@ -1,6 +1,7 @@
 package spatial
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -27,8 +28,11 @@ type ListGrid2D struct {
 
 	GridWidth           int
 	CellWidth, BoxWidth float64
+}
 
-	origin Point2D
+func (pt *ListPoint2D) String() string {
+	return fmt.Sprintf("(%f, %f)[%d] (Next: %d, Prev: %d)",
+		pt.X, pt.Y, pt.Cell(), pt.NextIdx, pt.PrevIdx)
 }
 
 // Cell returns the index of the grid cell which the given point is a member of.
@@ -40,6 +44,7 @@ func (pt *ListPoint2D) Cell() int {
 
 // IsHead returns true if the given ListPoint2D is the first item in its list
 // and false otherwise.
+
 func (pt *ListPoint2D) IsHead() bool { return pt.PrevIdx == ListNil }
 
 // IsTail returns true if the given ListPoint2D is the last itme in its list
@@ -80,7 +85,7 @@ func (pt *ListPoint2D) Delete() {
 	if prev != nil {
 		prev.NextIdx = pt.NextIdx
 	} else {
-		pt.grid.Heads[cell] = ListNil
+		pt.grid.Heads[cell] = pt.NextIdx
 	}
 
 	pt.NextIdx = ListNil
@@ -143,14 +148,15 @@ func (grid *ListGrid2D) ListHead(cell int) *ListPoint2D {
 	if grid.Heads[cell] == ListNil {
 		return nil
 	}
+
 	return &grid.Points[grid.Heads[cell]]
 }
 
 // You only need to set pt.X and pt.Y before calling this.
 func (grid *ListGrid2D) reinsert(pt *ListPoint2D, ptIdx int) {
 	// TODO: add bounds checks
-	cell := pt.Cell()
 	pt.grid = grid
+	cell := pt.Cell()
 	pt.PrevIdx = ListNil
 
 	next := grid.ListHead(cell)
@@ -169,20 +175,20 @@ func (grid *ListGrid2D) reinsert(pt *ListPoint2D, ptIdx int) {
 func (grid *ListGrid2D) Insert(pts []Point2D) {
 	// TODO: add nil check
 	listPts := make([]ListPoint2D, len(pts))
-	
-	for i := 0; i < len(pts); i++ {
-		ptIdx := len(grid.Points) + i
 
+	oldLen := len(grid.Points)
+	if oldLen == 0 { 
+		grid.Points = listPts
+	} else {
+		grid.Points = append(grid.Points, listPts...)
+	}
+
+	for i := 0; i < len(pts); i++ {
+		ptIdx := i + oldLen
 		listPts[i].X = pts[i].X
 		listPts[i].Y = pts[i].Y
 		
 		grid.reinsert(&listPts[i], ptIdx)
-	}
-
-	if len(grid.Points) == 0 {
-		grid.Points = listPts
-	} else {
-		grid.Points = append(grid.Points, listPts...)
 	}
 }
 
@@ -196,15 +202,17 @@ func (grid *ListGrid2D) Move(ptIdx int, target *Point2D) {
 }
 
 // Slices returns a slice containing all the 
-func (grid *ListGrid2D) Slice(gridIdx int) []Point2D {
+func (grid *ListGrid2D) Slice(gridIdx int) []int {
 	// TODO: bounds checks
+	slice := make([]int, grid.Sizes[gridIdx])
+	if len(slice) == 0 {
+		return slice
+	}
 
-	slice := make([]Point2D, grid.Sizes[gridIdx])
-
+	slice[0] = grid.Heads[gridIdx]
 	pt := grid.ListHead(gridIdx)
-	for i := 0; i < len(slice); i++ {
-		slice[gridIdx].X = pt.X
-		slice[gridIdx].Y = pt.Y
+	for i := 0; i < len(slice) - 1; i++ {
+		slice[i + 1] = pt.NextIdx
 		pt = pt.Next()
 	}
 
