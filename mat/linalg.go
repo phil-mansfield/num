@@ -4,7 +4,7 @@ package mat
 // of the eigenvalues is the same as the order of the corresponding
 // eigenvectors returned by m.Eigenvectors().
 //
-// If the Matrix is not square, an error is returned.
+// If m is nil or not square, a non-nil error is returned.
 func (m *Matrix) Eigenvalues() ([]complex128, error) {
 	return nil, nil
 }
@@ -13,43 +13,46 @@ func (m *Matrix) Eigenvalues() ([]complex128, error) {
 // The order of the eigenvectos is the same as the order of the corresponding
 // eigenvalues returned by m.Eigenvalues().
 //
-// If the Matrix is not a square matrix, an error is returned.
+// If m is nil or not a square matrix, a non-nil error is returned.
 func (m *Matrix) Eigenvectors() ([][]complex128, error) {
 	return nil, nil
 }
 
 // Determinant returns the determinant of m.
 //
-// If m is not a square matrix, an error is returned.
+// If m is nil or not a square Matrix, a non-nil error is returned.
 func (m *Matrix) Determinant() (float64, error) {
-	return -1, nil
+	return 0, nil
 }
 
 // Invert returns the inverse of m.
 //
-// If m is not a square matrix or is sigular, an error is returned.
-func Invert(m *Matrix) (*Matrix, error) {
-	return nil, nil
+// If m is nil or not a square matrix or is singular, an error Matrix is
+// returned.
+func Invert(m *Matrix) *Matrix {
+	return nil
 }
 
 // Invert calculates the inverse of m and places it in the target Matrix.
 //
-// If m is not a square matri or is sigular, an error is returned. An error is
-// also returned if the target Matrix does not have the same shape as the
-// inverse of m.
-func (target *Matrix) Invert(m *Matrix) error {
-	return nil
+// If m is nil or not a square Matrix or is sigular, target is set to an error
+// Matrix. target is also set to an error Matrix if it is not the same shape as
+// the transpose of m.
+func (target *Matrix) Invert(m *Matrix) {
+	return
 }
 
 // Transpose returns the transpose of m.
-func Transpose(m *Matrix) (*Matrix, error) {
-	return nil, nil
+//
+// If m is nil, an error Matrix is returned.
+func Transpose(m *Matrix) *Matrix {
+	return nil
 }
 
 // Transpose computes the transpose of m and places it in the target Matrix.
 //
-// Transpose returns an error if the target matrix does not have the same shape
-// as the transpose of m.
-func (target *Matrix) Transpose(m *Matrix) error {
-	return nil
+// If m is nil or if target is not hte same shape as the transpose of m, target
+// is set to an error Matrix.
+func (target *Matrix) Transpose(m *Matrix) {
+	return
 }
