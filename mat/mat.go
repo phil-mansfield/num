@@ -1,10 +1,3 @@
-/*
-package mat implements basic matrix operations on real-valued matrices. The
-subpackage cmat/ implements the operations for complex-valued matrices. In the
-interest of providing clean interfaces several non-trivial optimizations based
-on parameter-spamming and algorithm selection have been ignored. These
-clunkier, optimized interfaces can be found in the optmat/ and optcmat/
-subpackages. */
 package mat
 
 // Matrix represents a two-dimensional rectangluar array of real values.
@@ -47,7 +40,7 @@ func Identity(width int) *Matrix {
 //
 // If width * height != len(values) or if height or width is non-positive, an
 // error Matrix will be returned.
-func FromArray(width, height int, values []float64) *Matrix {
+func FromSlice(width, height int, values []float64) *Matrix {
 	return nil
 }
 
@@ -103,8 +96,8 @@ func (m *Matrix) Width() int {
 
 // Get returns the element of the matrix with coordinates (x, y).
 //
-// Get and Set are unique in that they panic upon erroneous input instead of
-// returning an error.
+// Get and Set are unique in that they panic upon out of bounds input instead
+// of returning an error.
 func (m *Matrix) Get(x, y int) float64 {
 	return 0.0
 }
@@ -112,8 +105,8 @@ func (m *Matrix) Get(x, y int) float64 {
 // Set changes the element in the matrix with coordinates (x, y) so that it
 // has the given value.
 //
-// Get and Set are unique in that they panic upon erroneous input instead of
-// returning an error.
+// Get and Set are unique in that they panic upon out of bounds input instead
+// of returning an error.
 func (m *Matrix) Set(x, y int, val float64) {
 	return
 }
