@@ -94,6 +94,20 @@ func (m *Matrix) Width() int {
 	return -1
 }
 
+// Slice returns a slice containing all the values within m. The value at the
+// zero-indexed coordinates (x, y) will be placed at index x + m.Width() * y
+// in the slice.
+func (m *Matrix) Slice() []float64 {
+	return nil
+}
+
+// Grid returns a 2D slice containing all the values within m. The value at
+// the zero-indexed coordinates (x, y) will be placed at index grid[y][x] in
+// the output grid.
+func (m *Matrix) Grid() [][]float64 {
+	return nil
+}
+
 // Get returns the element of the matrix with coordinates (x, y).
 //
 // Get and Set are unique in that they panic upon out of bounds input instead
@@ -121,5 +135,20 @@ func (m *Matrix) Print() {
 // arrays where each element is formatted according to the given format string.
 // Each row in the matrix is given its own line.
 func (m *Matrix) Printf(fmt string) {
+	return
+}
+
+// Copy returns a copy of m.
+//
+// If m is nil, Copy returns an error Matrix.
+func Copy(m *Matrix) *Matrix {
+	return nil
+}
+
+// Copy copies the values in m to target.
+//
+// If target is not the same shape as m or if m is nil, target is set to an
+// error Matrix.
+func (target *Matrix) Copy(m *Matrix) {
 	return
 }
