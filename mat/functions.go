@@ -35,7 +35,7 @@ func Cos(m *Matrix) *Matrix {
 // Cosh computes the matrix hyperbolic cosine of m and returns the result.
 //
 // If m is nil or not a square Matrix, an error Matrix is returned.
-func Cosh(m * Matrix) *Matrix {
+func Cosh(m *Matrix) *Matrix {
 	return nil
 }
 
@@ -101,7 +101,7 @@ func (target *Matrix) Cos(m *Matrix) {
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Cosh(m * Matrix) {
+func (target *Matrix) Cosh(m *Matrix) {
 	return
 }
 

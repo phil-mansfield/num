@@ -1,5 +1,5 @@
 /*
-package mat implements basic matrix operations on real-valued matrices. The 
+package mat implements basic matrix operations on real-valued matrices. The
 subpackage cmat/ implements the operations for complex-valued matrices. In the
 interest of providing clean interfaces several non-trivial optimizations based
 on parameter-spamming and algorithm selection have been ignored. These
@@ -9,11 +9,11 @@ package mat
 
 // Matrix represents a two-dimensional rectangluar array of real values.
 // *Matrix implements the error interface.
-type Matrix struct { }
+type Matrix struct{}
 
 // MatrixError is error type returned by functions which do not result in
 // a new Matrix. *MatrixError implements the error interface.
-type MatrixError struct { }
+type MatrixError struct{}
 
 func (m *Matrix) Error() string {
 	return ""
@@ -110,7 +110,7 @@ func (m *Matrix) Get(x, y int) float64 {
 }
 
 // Set changes the element in the matrix with coordinates (x, y) so that it
-// has the given value. 
+// has the given value.
 //
 // Get and Set are unique in that they panic upon erroneous input instead of
 // returning an error.

@@ -50,7 +50,7 @@ func (target *Matrix) Sub(m1, m2 *Matrix) {
 // Mult computes m1 * m2 and stores the result in the target matrix.
 //
 // If the width of m1 is not the same as the height or m2, or if target does
-// not have the same width as m2 and the same height as m1, or if either input 
+// not have the same width as m2 and the same height as m1, or if either input
 // Matrix is nil, target is set to an error Matrix.
 func (target *Matrix) Mult(m1, m2 *Matrix) {
 	return
