@@ -34,7 +34,22 @@ func Invert(m *Matrix) (*Matrix, error) {
 
 // Invert calculates the inverse of m and places it in the target Matrix.
 //
-// If m is not a square matrix, an error is returned.
+// If m is not a square matri or is sigular, an error is returned. An error is
+// also returned if the target Matrix does not have the same shape as the
+// inverse of m.
 func (target *Matrix) Invert(m *Matrix) error {
+	return nil
+}
+
+// Transpose returns the transpose of m.
+func Transpose(m *Matrix) (*Matrix, error) {
+	return nil, nil
+}
+
+// Transpose computes the transpose of m and places it in the target Matrix.
+//
+// Transpose returns an error if the target matrix does not have the same shape
+// as the transpose of m.
+func (target *Matrix) Transpose(m *Matrix) error {
 	return nil
 }
