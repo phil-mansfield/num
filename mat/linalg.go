@@ -25,6 +25,13 @@ func (m *Matrix) Determinant() (float64, error) {
 	return 0, nil
 }
 
+// Trace returns the trace of m.
+//
+// Trace returns an error if m is nil or not a square Matrix.
+func (m *Matrix) Trace() (float64, error) {
+	return 0, nil
+}
+
 // Invert returns the inverse of m.
 //
 // If m is nil or not a square matrix or is singular, an error Matrix is
