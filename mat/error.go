@@ -14,6 +14,8 @@ const (
 	_ int = iota
 	NilError // An operation was called on a nil pointer.
 	ShapeError // Requirements on Matrix shapes were not met.
+	SingluarError // Matrix was singular in a context where this was not
+	              // allowed.
 	ParameterError // A non-Matrix function parameter was outside the
 	               // aceptable range.
 )
@@ -28,7 +30,8 @@ var (
 // visa-versa. If the behavior after the funciton has been called is to panic,
 // true is returned, otherwise false is returned.
 //
-// By default operations will not panic.
+// By default, operations will not panic. Changing this behavior outside of a
+// debugging context is strongly discouraged.
 func TogglePanic() bool {
 	return false
 }
