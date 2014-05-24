@@ -2,14 +2,22 @@ package mat
 
 // Matrix represents a two-dimensional rectangluar array of real values.
 // *Matrix implements the error interface.
-type Matrix struct{}
+type Matrix struct {
+	values []float64
+	width, height int
+	err *MatrixError
+}
 
 // New returns a matrix with the given dimensions where all elements are
 // initialized to zero.
 //
 // If height or width is non-positive, an error Matrix will be returned.
 func New(width, height int) *Matrix {
-	return nil
+	m := new(Matrix)
+	m.width, m.height = width, height
+	m.values = make([]float64, width * height)
+
+	return m
 }
 
 // Identity returns a square matrix with the given width which contains ones

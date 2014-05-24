@@ -33,7 +33,7 @@ func exampleAllocation() {
 	// mGrid is set to
 	// [[4,  8,  15],
 	//  [16, 23, 42]]
-	gValues := [][]float64{[]float64{4, 8, 15}, []float64{16, 23, 42}}
+	gValues := [][]float64{{4, 8, 15}, {16, 23, 42}}
 	gSlice := FromGrid(gValues)
 
 	if gSlice.IsError() {
@@ -42,13 +42,14 @@ func exampleAllocation() {
 
 	// Checking for errors on FromSlice and FromGrid calls is always a good
 	// idea even if using a slice literal since slice literals are particularly
-	// vulnerable to typos.
+	// vulnerable to typos. FromGrid is prefered to FromSlice because changes
+	// to the input can be localized to a single value.
 }
 
 // exampleGetSet gives an example of the use of Get and Set to reimplement
 // the Copy operation. Also shows the Height and Width methods.
 func exampleGetSet() {
-	source := FromSlice(2, 2, []float64{1, 2, 3, 4})
+	source := FromGrid([][]float64{{1, 2}, {3, 4}})
 	target := New(2, 2)
 
 	if source.IsError() {
