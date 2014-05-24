@@ -87,13 +87,26 @@ func codeName(code int) string {
 	}
 }
 
+// newErrorMatrix creates a new error Matrix corresponding to the given error
+// code. operationName should given the name of the function which this function
+// is being called from (this will not neccesarily be the name seen by the
+// user), and a brief but meaningful description of the error, even if it is
+// redundant with the error code. The description should contain no information
+// about the operation that generated it, so that the operation may be changed
+// as the error is propogated up the stack.
+func newErrorMatrix(code int, operationName, desc string) *Matrix {
+	return &Matrix{[]float64{}, 0, 0, newError(code, operationName, desc)}
+}
+
 // newError creates a new MatrixError corresponding to the given error code.
 // operationName should given the name of the function which this function is
 // being called from (this will not neccesarily be the name seen by the user),
-// and a brief but meaningful description of the error, even if it si redendant
-// with the error code.
-func newError(code int, operationName, description string) *MatrixError {
-	err := &MatrixError{code, operationName, description, ""}
+// and a brief but meaningful description of the error, even if it is redundant
+// with the error code. The description should contain no information about the
+// operation that generated it, so that the operation may be changed as the
+// error is propogated up the stack.
+func newError(code int, operationName, desc string) *MatrixError {
+	err := &MatrixError{code, operationName, desc, ""}
 	if willPanic {
 		panic(err.Error())
 	}
