@@ -45,8 +45,8 @@ func Invert(m *Matrix) *Matrix {
 // If m is nil or not a square Matrix or is sigular, target is set to an error
 // Matrix. target is also set to an error Matrix if it is not the same shape as
 // the transpose of m.
-func (target *Matrix) Invert(m *Matrix) {
-	return
+func (target *Matrix) Invert(m *Matrix) *Matrix {
+	return nil
 }
 
 // Transpose returns the transpose of m.
@@ -60,6 +60,6 @@ func Transpose(m *Matrix) *Matrix {
 //
 // If m is nil or if target is not hte same shape as the transpose of m, target
 // is set to an error Matrix.
-func (target *Matrix) Transpose(m *Matrix) {
-	return
+func (target *Matrix) Transpose(m *Matrix) *Matrix {
+	return nil
 }

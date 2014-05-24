@@ -61,73 +61,73 @@ func Func(f num.Func1D, m *Matrix) *Matrix {
 }
 
 // Exp computes the matrix exponential of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Exp(m *Matrix) {
-	return
+func (target *Matrix) Exp(m *Matrix) *Matrix {
+	return nil
 }
 
 // Sin computes the matrix radian sine of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Sin(m *Matrix) {
-	return
+func (target *Matrix) Sin(m *Matrix) *Matrix {
+	return nil
 }
 
 // Sinh computes the matrix hyperbolic sine of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Sinh(m *Matrix) {
-	return
+func (target *Matrix) Sinh(m *Matrix) *Matrix {
+	return nil
 }
 
 // Cos computes the matrix radian cosine of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Cos(m *Matrix) {
-	return
+func (target *Matrix) Cos(m *Matrix) *Matrix {
+	return nil
 }
 
 // Cosh computes the matrix hyperbolic cosine of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Cosh(m *Matrix) {
-	return
+func (target *Matrix) Cosh(m *Matrix) *Matrix {
+	return nil
 }
 
 // Log computes the matrix natural logarithm of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Log(m *Matrix) {
-	return
+func (target *Matrix) Log(m *Matrix) *Matrix {
+	return nil
 }
 
 // Sqrt computes the matrix square root of m and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Sqrt(m *Matrix) {
-	return
+func (target *Matrix) Sqrt(m *Matrix) *Matrix {
+	return nil
 }
 
 // Func computes the matrix function f(m) and stores the result in the target
-// Matrix.
+// Matrix. The target matrix is also returned.
 //
 // If m is nil or not a square Matrix or if target is not the same shape as m,
 // target is set to an error Matrix.
-func (target *Matrix) Func(f num.Func1D, m *Matrix) {
-	return
+func (target *Matrix) Func(f num.Func1D, m *Matrix) *Matrix {
+	return nil
 }

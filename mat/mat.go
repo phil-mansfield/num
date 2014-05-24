@@ -143,10 +143,10 @@ func Copy(m *Matrix) *Matrix {
 	return nil
 }
 
-// Copy copies the values in m to target.
+// Copy copies the values in m to target. The target matrix is also returned.
 //
 // If target is not the same shape as m or if m is nil, target is set to an
 // error Matrix.
-func (target *Matrix) Copy(m *Matrix) {
-	return
+func (target *Matrix) Copy(m *Matrix) *Matrix {
+	return nil
 }

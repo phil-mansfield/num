@@ -31,36 +31,39 @@ func Scale(m *Matrix, c float64) *Matrix {
 	return nil
 }
 
-// Add computes m1 + m2 and stores the result in the target Matrix.
+// Add computes m1 + m2 and stores the result in the target Matrix. The target
+// matrix is also returned.
 //
 // If m1, m2, and target are not all the same size or if either input Matrix is
 // nil, target is set to an error Matrix.
-func (target *Matrix) Add(m1, m2 *Matrix) {
-	return
+func (target *Matrix) Add(m1, m2 *Matrix) *Matrix {
+	return nil
 }
 
-// Sub computes m1 - m2 and stores the result in the target Matrix.
+// Sub computes m1 - m2 and stores the result in the target Matrix. The target
+// matrix is also returned.
 //
 // If m1, m2, and target are not all the same size or if either input Matrix is
 // nil, target is set to an error Matrix.
-func (target *Matrix) Sub(m1, m2 *Matrix) {
-	return
+func (target *Matrix) Sub(m1, m2 *Matrix) *Matrix {
+	return nil
 }
 
-// Mult computes m1 * m2 and stores the result in the target matrix.
+// Mult computes m1 * m2 and stores the result in the target matrix. The target
+// matrix is also returned.
 //
 // If the width of m1 is not the same as the height or m2, or if target does
 // not have the same width as m2 and the same height as m1, or if either input
 // Matrix is nil, target is set to an error Matrix.
-func (target *Matrix) Mult(m1, m2 *Matrix) {
-	return
+func (target *Matrix) Mult(m1, m2 *Matrix) *Matrix {
+	return nil
 }
 
 // Scale multiplies every element of m by c and stores the result in the
-// target Matrix.
+// target Matrix. The target matrix is also returned.
 //
 // If m and target are not the same size or if m is nil, target is set to an
 // error Matrix.
-func (target *Matrix) Scale(m *Matrix, c float64) {
-	return
+func (target *Matrix) Scale(m *Matrix, c float64) *Matrix {
+	return nil
 }
