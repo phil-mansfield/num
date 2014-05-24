@@ -6,17 +6,39 @@ type Matrix struct{}
 
 // MatrixError is error type returned by functions which do not result in
 // a new Matrix. *MatrixError implements the error interface.
-type MatrixError struct{}
+type MatrixError struct{
+	Code int // error code representing the type of error which occured
+	Description string // description of especifics of error
+	OperationName string // name of operation which gave error
+}
 
+const (
+	// Error codes that can be returned by operations in package mat.
+	_ int = iota
+	NilError // An operation was called on a nil pointer.
+	ShapeError // Requirements on Matrix shapes were not met.
+	ParameterError // A non-Matrix function parameter was outside the
+	               // aceptable range.
+)
+
+// Error returns a string representing the first error that occured in the
+// creation of m. If no errors occured or if m is nil, an empty string is
+// returned.
 func (m *Matrix) Error() string {
 	return ""
 }
 
-func (m *MatrixError) Error() string {
-	return ""
+// MatrixError returns a pointer to the struct representing the first error
+// that occured in the creation of m. If no such error occured, or if m is nil,
+// nil is returned.
+func (m *Matrix) MatrixError() *MatrixError {
+	return nil
 }
 
-// Initialization functions
+// Error returns a string representation of me. If me is nil, nil is returned.
+func (me *MatrixError) Error() string {
+	return ""
+}
 
 // New returns a matrix with the given dimensions where all elements are
 // initialized to zero.
@@ -53,8 +75,6 @@ func FromSlice(width, height int, values []float64) *Matrix {
 func FromGrid(values [][]float64) *Matrix {
 	return nil
 }
-
-// Utility functions
 
 // IsError indicates whether m is an error Matrix. IsError returns true if m
 // is the result of an invalid operation or if one of the matrices used as
@@ -108,6 +128,8 @@ func (m *Matrix) Grid() [][]float64 {
 	return nil
 }
 
+// InBounds returns true if the (x, y) coordinate pair is within the bounds
+// of m and false otherwise.
 func (m *Matrix) InBounds(x, y int) bool {
 	return false
 }
