@@ -108,6 +108,10 @@ func (m *Matrix) Grid() [][]float64 {
 	return nil
 }
 
+func (m *Matrix) InBounds(x, y int) bool {
+	return false
+}
+
 // Get returns the element of the matrix with coordinates (x, y).
 //
 // Get and Set are unique in that they panic upon out of bounds input instead
