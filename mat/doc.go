@@ -40,7 +40,7 @@ allocation call:
 	// Initialize a and b.
 	
 	res := mat.New(2, 2)
-	res.Exp(A.Add(a, b))
+	res.Exp(a.Add(a, b))
 
 As long as the target Matrix is the same size as the result of its method,
 it is always safe to call that method, even if that Matrix is a method
