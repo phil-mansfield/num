@@ -44,6 +44,15 @@ func TogglePanic() bool {
 	return willPanic
 }
 
+// IsError indicates whether m is an error Matrix. IsError returns true if m
+// is the result of an invalid operation or if one of the matrices used as
+// arguments to this operation was an error Matrix. If m was an error Matrix
+// prior to being the target of an operation and the operation succeeds, it
+// will no longer be an error Matrix.
+func (m *Matrix) IsError() bool {
+	return m.err != nil
+}
+
 // Error returns a string representing the first error that occured in the
 // creation of m. If no errors occured or if m is nil, an empty string is
 // returned.
@@ -93,7 +102,8 @@ func codeName(code int) string {
 // user), and a brief but meaningful description of the error, even if it is
 // redundant with the error code. The description should contain no information
 // about the operation that generated it, so that the operation may be changed
-// as the error is propogated up the stack.
+// as the error is propogated up the stack. All descriptions must be full
+// sentences.
 func newErrorMatrix(code int, operationName, desc string) *Matrix {
 	return &Matrix{[]float64{}, 0, 0, newError(code, operationName, desc)}
 }
@@ -104,7 +114,7 @@ func newErrorMatrix(code int, operationName, desc string) *Matrix {
 // and a brief but meaningful description of the error, even if it is redundant
 // with the error code. The description should contain no information about the
 // operation that generated it, so that the operation may be changed as the
-// error is propogated up the stack.
+// error is propogated up the stack. All descriptions must be full sentences.
 func newError(code int, operationName, desc string) *MatrixError {
 	err := &MatrixError{code, operationName, desc, ""}
 	if willPanic {
