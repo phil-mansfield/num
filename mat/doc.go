@@ -142,7 +142,7 @@ error:
 
 	if res.IsError() {
 		err := res.MatrixError()
-		println(err.Operation)
+		println(err.OperationName)
 		// Output is "Add", not "Exp".
 	}
 
