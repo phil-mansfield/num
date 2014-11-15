@@ -28,14 +28,11 @@ func benchmarkUniformAt(gt GeneratorType, tLen int, b *testing.B) {
 }
 
 
-func BenchmarkUniformGsl(b *testing.B) { benchmarkUniform(Gsl, b) }
+
 func BenchmarkUniformGolang(b *testing.B) { benchmarkUniform(Golang, b) }
-func BenchmarkUniformMwc(b *testing.B) { benchmarkUniform(MultiplyWithCarry, b) }
 func BenchmarkUniformXorshift(b *testing.B) { benchmarkUniform(Xorshift, b) }
 func BenchmarkUniformTausworthe(b *testing.B) { benchmarkUniform(Tausworthe, b) }
 
-func BenchmarkUniformAtGsl(b *testing.B) { benchmarkUniformAt(Gsl, DefaultBufSize, b) }
 func BenchmarkUniformAtGolang(b *testing.B) { benchmarkUniformAt(Golang, DefaultBufSize, b) }
-func BenchmarkUniformAtMwc(b *testing.B) { benchmarkUniformAt(MultiplyWithCarry, DefaultBufSize, b) }
 func BenchmarkUniformAtXorshift(b *testing.B) { benchmarkUniformAt(Xorshift, DefaultBufSize, b) }
 func BenchmarkUniformAtTausworthe(b *testing.B) { benchmarkUniformAt(Tausworthe, DefaultBufSize, b) }

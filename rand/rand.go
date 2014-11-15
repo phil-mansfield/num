@@ -27,9 +27,7 @@ type GeneratorType uint8
 const (
 	Xorshift GeneratorType = iota
 	Golang
-	MultiplyWithCarry // Do not use, under intense scrutiny.
 	Tausworthe
-	Gsl // Do not use, under intense scrutiny.
 
 	Default = Tausworthe
 )
@@ -46,14 +44,8 @@ func New(gt GeneratorType, seed uint64) *Generator {
 		backend = new(xorshiftGenerator)
 	case Golang:
 		backend = new(golangGenerator)
-	case MultiplyWithCarry:
-		println("WARNING: INCORRECT RAND IMPLEMENTATION")
-		backend = new(multiplyWithCarryGenerator)
 	case Tausworthe:
 		backend = new(tauswortheGenerator)
-	case Gsl:
-		println("WARNING: INCORRECT RAND IMPLEMENTATION")
-		backend = new(gslRandGenerator)
 	default:
 		panic("Unrecognized GeneratorType")
 	}
@@ -69,11 +61,13 @@ func New(gt GeneratorType, seed uint64) *Generator {
 // in places where they are not maybe neccesary. Deal with it.
 
 func (gen *Generator) Uniform(low, high float64) float64 {
+	if low == 0.0 && high == 1.0 { return gen.backend.Next() }
 	return (gen.backend.Next() * (high - low)) + low
 }
 
 func (gen *Generator) UniformAt(low, high float64, target []float64) {
 	gen.backend.NextSequence(target)
+	if low == 0.0 && high == 1.0 { return }
 	for i := 0; i < len(target); i ++ {
 		target[i] = target[i] * (high - low) + low
 	}
@@ -83,6 +77,16 @@ func (gen *Generator) UniformAt(low, high float64, target []float64) {
 func (gen *Generator) UniformInt(low, high int) int {
 	unif := gen.Uniform(0, float64(high - low + 1))
 	return low + int(unif)
+}
+
+func (gen *Generator) UniformIntAt(low, high int, target []int) {
+	// TODO: Find out if there really no better way to do this.
+	// Could always have them pass a float buffer, too.
+	unifs := make([]float64, len(target))
+	gen.UniformAt(0, float64(high - low + 1), unifs)
+	for i := 0; i < len(target); i++ {
+		target[i] = low + int(unifs[i])
+	}
 }
 
 func (gen *Generator) MonteCarlo(f num.Func1D, lowX, highX, lowY, highY float64) float64 {
