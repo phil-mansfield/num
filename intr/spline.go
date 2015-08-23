@@ -2,7 +2,45 @@ package intr
 
 type Spline struct { }
 
+type Coeff struct { }
+
 func NewSpline(xs, ys []float64, opts ...SplineOption) *Spline {
+	panic("NYI")
+}
+
+func (s *Spline) LowerBound() float64 {
+	panic("NYI")
+}
+
+func (s *Spline) UpperBound() float64 {
+	panic("NYI")
+}
+
+func (s *Spline) Coeffs(out ...[]Coeff) []Coeff {
+	panic("NYI")
+}
+
+func (s *Spline) Eval(x float64) float64 {
+	panic("NYI")
+}
+
+func (s *Spline) EvalAll(xs []float64, out ...[]float64) []float64 {
+	panic("NYI")
+}
+
+func (s *Spline) Deriv(x float64, order int) float64 {
+	panic("NYI")
+}
+
+func (s *Spline) DerivAll(xs []float64, order int, out ...[]float64) []float64 {
+	panic("NYI")
+}
+
+func (s *Spline) Int(low, high float64) float64 {
+	panic("NYI")
+}
+
+func (s *Spline) IntAll(lows, high []float64, out ...[]float64) []float64 {
 	panic("NYI")
 }
 
@@ -17,12 +55,18 @@ func SplineBounds(lower, upper SplineBoundaryCondition) SplineOption {
 	panic("NYI")
 }
 
+func MemoizeIntegrals(flag bool) SplineOption {
+	panic("NYI")
+}
+
+func CopyInput(flag bool) SplineOption {
+	panic("NYI")
+}
+
 type splineBoundaryCondition func(*Spline)
 type SplineBoundaryCondition splineBoundaryCondition
 
-// Test Comment 1.
 var Natural SplineBoundaryCondition = natural
-// Test Comment 2
 var FiniteDiff SplineBoundaryCondition = finiteDiff
 
 func natural(s *Spline) {
