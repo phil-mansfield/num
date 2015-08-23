@@ -12,15 +12,7 @@ func (p *smoothParams) load(opts []SmoothOption) {
 type smoothOption func(*smoothParams)
 type SmoothOption smoothOption
 
-func Bounds(bc BoundaryCondition) SmoothOption {
-	panic("NYI")
-}
-
-func LowerBound(bc BoundaryCondition) SmoothOption {
-	panic("NYI")
-}
-
-func UpperBound(bc BoundaryCondition) SmoothOption {
+func SmoothBounds(lower, upper SmoothBoundaryCondition) SmoothOption {
 	panic("NYI")
 }
 
@@ -53,16 +45,16 @@ func Order(order int) SavGolOption {
 	panic("NYI")
 }
 
-type boundaryCondition func(lower, uppper bool, p *smoothParams)
-type BoundaryCondition boundaryCondition
+type smoothBoundaryCondition func(lower, uppper bool, p *smoothParams)
+type SmoothBoundaryCondition smoothBoundaryCondition
 
 var (
-	Mirror BoundaryCondition = mirror
-	Extend BoundaryCondition = extend
-	Periodic BoundaryCondition = periodic
+	Mirror SmoothBoundaryCondition = mirror
+	Extend SmoothBoundaryCondition = extend
+	Periodic SmoothBoundaryCondition = periodic
 )
 
-func Constant(c float64) BoundaryCondition {
+func Constant(c float64) SmoothBoundaryCondition {
 	panic("NYI")
 }
 
