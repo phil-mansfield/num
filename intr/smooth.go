@@ -48,11 +48,9 @@ func Order(order int) SavGolOption {
 type smoothBoundaryCondition func(lower, uppper bool, p *smoothParams)
 type SmoothBoundaryCondition smoothBoundaryCondition
 
-var (
-	Mirror SmoothBoundaryCondition = mirror
-	Extend SmoothBoundaryCondition = extend
-	Periodic SmoothBoundaryCondition = periodic
-)
+var Mirror SmoothBoundaryCondition = mirror
+var Extend SmoothBoundaryCondition = extend
+var Periodic SmoothBoundaryCondition = periodic
 
 func Constant(c float64) SmoothBoundaryCondition {
 	panic("NYI")
