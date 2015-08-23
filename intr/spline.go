@@ -21,14 +21,14 @@ type splineBoundaryCondition func(*Spline)
 type SplineBoundaryCondition splineBoundaryCondition
 
 // Test Comment 1.
-var natural SplineBoundaryCondition = Natural
+var Natural SplineBoundaryCondition = natural
 // Test Comment 2
-var finiteDiff SplineBoundaryCondition = FiniteDiff
+var FiniteDiff SplineBoundaryCondition = finiteDiff
 
-func Natural(s *Spline) {
+func natural(s *Spline) {
 	panic("NYI")
 }
 
-func FiniteDiff(s *Spline){
+func finiteDiff(s *Spline){
 	panic("NYI")
 }
