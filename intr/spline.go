@@ -1,5 +1,8 @@
 package intr
 
+import (
+	"fmt"
+)
 
 // Spline represents a cubic interpolating spline curve. The curve passes
 // through a given set of points and allows for the evaluation of integrals,
@@ -29,9 +32,7 @@ type Spline struct {
 	coeffs []coeff
 	dy2Low, dy2High float64
 
-	findCache int
-
-	incr bool
+	cache int
 	
 	// Optional params:
 	copyInput, unif, strict, accelInt bool
@@ -45,8 +46,8 @@ type coeff struct {
 }
 
 // NewSpline creates a new interpolating spline corresponding to the given
-// points. If these points are not sorted in either ascending or descending
-// order, the function will panic.
+// points. If these points are not sorted in ascending  order, the function
+// will panic.
 //
 // Additional customization options can be provided as variadic arguments.
 // Example:
@@ -91,8 +92,8 @@ func (s *Spline) Coeffs(i int) (a, b, c, d float64) {
 			"Index %d out of range for spline with %d intervals.",
 			i, len(s.xs) - 1))
 	}
-	c := s.coeffs[i]
-	return c.a, c.b, c.c, c.d
+	term := s.coeffs[i]
+	return term.a, term.b, term.c, term.d
 }
 
 // Range returns the lower and upper bounds of the specified interval.
@@ -103,7 +104,7 @@ func (s *Spline) Range(i int) (low, high float64) {
 			i, len(s.xs) - 1))
 	}
 
-	return 
+	return s.xs[i], s.xs[i+1]
 }
 
 // Eval returns the value of the spline at the given point.
@@ -149,6 +150,39 @@ func (s *Spline) IntAll(lows, high []float64, out ...[]float64) []float64 {
 }
 
 type splineOption func(*Spline)
+
+// A cached binary search.
+func (s *Spline) bsearch(x float64) (idx int, ok bool) {
+	// Check the bsearch cache.
+	var low, high int
+	n := s.Intervals()
+	if s.xs[s.cache] <= x {
+		if s.xs[s.cache + 1] >= x { return s.cache, true }
+		low, high = s.cache + 1, n
+	} else {
+		low, high = 0, s.cache
+	}
+
+	for high - low > 1 {
+		mid := (low + high) / 2
+		if x >= s.xs[mid] {
+			low = mid
+		} else {
+			high = mid
+		}
+	}
+
+	if high == 0 {
+		s.cache = 0
+		return 0, false
+	} else if low == n + 1 {
+		s.cache = n
+		return n, false
+	} else {
+		s.cache = low
+		return low, true
+	}
+}
 
 // SplineOptions are passed to NewSpline as variadic arguments to customize its
 // behavior. 
