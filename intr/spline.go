@@ -20,13 +20,29 @@ package intr
 //     }
 //
 //     // Second-order derivative.
-//     
+//     val := sp.Deriv(sp.LowerBound(), 2)
 //
 //     // Integrate.
 //     area := sp.Int(sp.LowerBound(), sp.UpperBound())
-type Spline struct { }
+type Spline struct {
+	xs, dy2s []float64
+	coeffs []coeff
+	dy2Low, dy2High float64
 
-type coeff struct { }
+	findCache int
+
+	incr bool
+	
+	// Optional params:
+	copyInput, unif, strict, accelInt bool
+	dx float64
+
+	intSum []float64
+}
+
+type coeff struct {
+	a, b, c, d float64
+}
 
 // NewSpline creates a new interpolating spline corresponding to the given
 // points. If these points are not sorted in either ascending or descending
@@ -137,47 +153,33 @@ type SplineOption splineOption
 // IntAll outside this range will panic. Otherwise the spline coefficients of
 // the outermost intervals are used.
 func StrictRange(strictRange bool) SplineOption {
-	panic("NYI")
+	return func(s *Spline) { s.strict = strictRange }
 }
 
-// SplineBounds sets the boundary conditions used by a spline. If not called,
-// both sides of the spline will use the Natural flag.
-func SplineBounds(lower, upper SplineBoundaryCondition) SplineOption {
-	panic("NYI")
+// SplineBounds sets the boundary conditions for the second derivatives of
+// the spline. If not called, both sides of the spline will use "natural"
+// boundary conditions, setting the second derivatives to 0.
+func SplineBounds(lower, upper float64) SplineOption {
+	return func(s *Spline) { s.dy2Low, s.dy2High = lower, upper	}
 }
 
 // AccelInt sets whether or not to aggressively optimizae integral calls at
 // the expense of slightly increased memory consumption. By default it is set
 // to true.
-func AccelInt(flag bool) SplineOption {
-	panic("NYI")
+func AccelInt(accelInt bool) SplineOption {
+	return func(s *Spline) { s.accelInt = accelInt }
+}
+
+// Unif tells the spline that the input x values are uniformly spaces with
+// distance dx.
+func Unif(dx float64) SplineOption {
+	return func(s *Spline) { s.unif, s.dx = true, dx }
 }
 
 // CopyInput sets whether or not to explicitly allocate and copy the input
 // slices when creating the spline. Only set this to true if memory consumption
 // is a concern and the input slices are not modified over the lifetime of the
 // spline.
-func CopyInput(flag bool) SplineOption {
-	panic("NYI")
-}
-
-type splineBoundaryCondition func(*Spline)
-type SplineBoundaryCondition splineBoundaryCondition
-
-// Natural forces the spline to use natural boundary condtions (the second
-// derivative is set to 0).
-var Natural SplineBoundaryCondition = natural
-
-func natural(s *Spline) {
-	panic("NYI")
-}
-
-func finiteDiff(s *Spline){
-	panic("NYI")
-}
-
-// Deriv2 forces the spline to use boundary conditions such that d^2y/dx^2 is
-// equal to the specified values.
-func Deriv2(val float64) SplineBoundaryCondition {
-	panic("NYI")
+func CopyInput(copyInput bool) SplineOption {
+	return func(s *Spline) { s.copyInput = copyInput }
 }
