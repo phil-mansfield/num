@@ -152,12 +152,12 @@ func (s *Spline) IntAll(lows, high []float64, out ...[]float64) []float64 {
 type splineOption func(*Spline)
 
 // A cached binary search.
-func (s *Spline) bsearch(x float64) (idx int, ok bool) {
+func (s *Spline) bsearch(x float64) int {
 	// Check the bsearch cache.
 	var low, high int
 	n := s.Intervals()
 	if s.xs[s.cache] <= x {
-		if s.xs[s.cache + 1] >= x { return s.cache, true }
+		if s.xs[s.cache + 1] >= x { return s.cache }
 		low, high = s.cache + 1, n
 	} else {
 		low, high = 0, s.cache
@@ -172,16 +172,17 @@ func (s *Spline) bsearch(x float64) (idx int, ok bool) {
 		}
 	}
 
-	if high == 0 {
-		s.cache = 0
-		return 0, false
-	} else if low == n + 1 {
-		s.cache = n
-		return n, false
-	} else {
-		s.cache = low
-		return low, true
+	if s.strict {
+		if s.xs[low] > x || s.xs[high] < x {
+			panic(fmt.Sprintf(
+				"%g is out of bounds for Spline with bounds [%g, %g]",
+				x, s.LowerBound(), s.UpperBound(),
+			))
+		}
 	}
+
+	s.cache = low
+	return low
 }
 
 // SplineOptions are passed to NewSpline as variadic arguments to customize its
