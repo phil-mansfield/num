@@ -74,30 +74,36 @@ func Reuse(xs, ys []float64, opts ...SplineOption) {
 // LowerBound returns the lowest value which is within range for the spline.
 // Unless the StrictRange option is set to false, calls to Eval, Deriv, and
 // Int which are lower than this value will panic.
-func (s *Spline) LowerBound() float64 {
-	panic("NYI")
-}
+func (s *Spline) LowerBound() float64 { return s.xs[0] }
 
 // UpperrBound returns the highest value which is within range for the spline.
 // Unless the StrictRange option is set to false, calls to Eval, Deriv, and
 // Int which are higher than this value will panic.
-func (s *Spline) UpperBound() float64 {
-	panic("NYI")
-}
+func (s *Spline) UpperBound() float64 { return s.xs[len(s.xs) - 1] }
 
 // Intervals returns the number of intervals that the spline is divided into.
-func (s *Spline) Intervals() int {
-	panic("NYI")
-}
+func (s *Spline) Intervals() int { return len(s.xs) - 1 }
 
 // Coeffs returns the spline coefficients of the specified interval.
 func (s *Spline) Coeffs(i int) (a, b, c, d float64) {
-	panic("NYI")
+	if i < 0 || i > len(s.xs) - 2 {
+		panic(fmt.Sprintf(
+			"Index %d out of range for spline with %d intervals.",
+			i, len(s.xs) - 1))
+	}
+	c := s.coeffs[i]
+	return c.a, c.b, c.c, c.d
 }
 
 // Range returns the lower and upper bounds of the specified interval.
 func (s *Spline) Range(i int) (low, high float64) {
-	panic("NYI")
+	if i < 0 || i >= len(s.xs) - 2 {
+		panic(fmt.Sprintf(
+			"Index %d out of range for spline with %d intervals.",
+			i, len(s.xs) - 1))
+	}
+
+	return 
 }
 
 // Eval returns the value of the spline at the given point.
