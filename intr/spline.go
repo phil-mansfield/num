@@ -115,8 +115,7 @@ func (s *Spline) Eval(x float64) float64 {
 	return a*dx*dx*dx + b*dx*dx + c*dx + d
 }
 
-// EvalAll returns the value of the spline at all the given points. Points must
-// be given in ascending order.
+// EvalAll returns the value of the spline at all the given points.
 //
 // If any output arrays are given, the output is written to those arrays with
 // no allocation.
@@ -145,15 +144,48 @@ func (s *Spline) EvalAll(xs []float64, out ...[]float64) []float64 {
 // Deriv calculates the derivative of the spline at the given point to the 
 // specified order.
 func (s *Spline) Deriv(x float64, order int) float64 {
-	panic("NYI")
+	i := s.bsearch(x)
+	dx := x - s.xs[i]
+	a, b, c, d := s.coeffs[i].a, s.coeffs[i].b, s.coeffs[i].c, s.coeffs[i].d
+	switch order {
+	case 0:
+		return a*dx*dx*dx + b*dx*dx + c*dx + d
+	case 1:
+		return 3*a*dx*dx + 2*b*dx + c
+	case 2:
+		return 6*a*dx + 2*b
+	case 3:
+		return 6*a
+	default:
+		return 0
+	}
 }
 
-// DerivAll returns the derivative of the spline at all the given points calculated to the specified order. Points must be given in ascending order.
+// DerivAll returns the derivative of the spline at all the given points
+// calculated to the specified order.
 //
 // If any output arrays are given, the output is written to those arrays with
 // no allocation.
 func (s *Spline) DerivAll(xs []float64, order int, out ...[]float64) []float64 {
-	panic("NYI")
+	var derivOut []float64
+	if len(out) == 0 {
+		derivOut = make([]float64, len(xs))
+	} else {
+		for i := range out {
+			if len(out[i]) != len(xs) {
+				panic(fmt.Sprintf("len(xs) = %d, but len(out[%d]) = %d",
+					len(xs), i, len(out[i])))
+			}
+		}
+	derivOut = out[0]
+	}
+
+	for i := range derivOut { derivOut[i] = s.Deriv(xs[i], order) }
+
+	if len(out) > 1 {
+		for i := range out[1:] { copy(out[i], derivOut) }
+	}
+	return derivOut
 }
 
 // Int calculates the integral of the spline across the given interval.
@@ -162,7 +194,6 @@ func (s *Spline) Int(low, high float64) float64 {
 }
 
 // IntAll returns the integral of the spline across all the given intervals.
-// Lower bounds must be given in ascending order.
 //
 // If any output arrays are given, the output is written to those arrays with
 // no allocation.
