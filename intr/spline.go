@@ -109,7 +109,10 @@ func (s *Spline) Range(i int) (low, high float64) {
 
 // Eval returns the value of the spline at the given point.
 func (s *Spline) Eval(x float64) float64 {
-	panic("NYI")
+	i := s.bsearch(x)
+	dx := x - s.xs[i]
+	a, b, c, d := s.coeffs[i].a, s.coeffs[i].b, s.coeffs[i].c, s.coeffs[i].d
+	return a*dx*dx*dx + b*dx*dx + c*dx + d
 }
 
 // EvalAll returns the value of the spline at all the given points. Points must
@@ -118,7 +121,25 @@ func (s *Spline) Eval(x float64) float64 {
 // If any output arrays are given, the output is written to those arrays with
 // no allocation.
 func (s *Spline) EvalAll(xs []float64, out ...[]float64) []float64 {
-	panic("NYI")
+	var evalOut []float64
+	if len(out) == 0 {
+		evalOut = make([]float64, len(xs))
+	} else {
+		for i := range out {
+			if len(out[i]) != len(xs) {
+				panic(fmt.Sprintf("len(xs) = %d, but len(out[%d]) = %d",
+					len(xs), i, len(out[i])))
+			}
+		}
+		evalOut = out[0]
+	}
+
+	for i := range evalOut { evalOut[i] = s.Eval(xs[i]) }
+
+	if len(out) > 1 {
+		for i := range out[1:] { copy(out[i], evalOut) }
+	}
+	return evalOut
 }
 
 // Deriv calculates the derivative of the spline at the given point to the 
