@@ -177,7 +177,7 @@ func (s *Spline) DerivAll(xs []float64, order int, out ...[]float64) []float64 {
 					len(xs), i, len(out[i])))
 			}
 		}
-	derivOut = out[0]
+		derivOut = out[0]
 	}
 
 	for i := range derivOut { derivOut[i] = s.Deriv(xs[i], order) }
@@ -190,15 +190,60 @@ func (s *Spline) DerivAll(xs []float64, order int, out ...[]float64) []float64 {
 
 // Int calculates the integral of the spline across the given interval.
 func (s *Spline) Int(low, high float64) float64 {
-	panic("NYI")
+	iLow, iHigh := s.bsearch(low), s.bsearch(high)
+	if iLow == iHigh {
+		return integTerm(&s.coeffs[iLow], low, high)
+	}
+
+	sum := integTerm(&s.coeffs[iLow], low, s.xs[iLow+1]) +
+		integTerm(&s.coeffs[iHigh], s.xs[iHigh], high)
+
+	if s.accelInt {
+		sum += s.intSum[iHigh - 1] - s.intSum[iLow]
+	} else {
+		for i := iLow + 1; i < iHigh; i++ {
+			sum += integTerm(&s.coeffs[i], s.xs[i], s.xs[i+1])
+		}
+	}
+
+	return sum
+}
+
+func integTerm(coeff *coeff, lo, hi float64) float64 {
+	a, b, c, d := coeff.a, coeff.b, coeff.c, coeff.d
+	dx := hi - lo
+	return a*dx*dx*dx*dx/4 + b*dx*dx*dx/3 + c*dx*dx/2 + d*dx
 }
 
 // IntAll returns the integral of the spline across all the given intervals.
 //
 // If any output arrays are given, the output is written to those arrays with
 // no allocation.
-func (s *Spline) IntAll(lows, high []float64, out ...[]float64) []float64 {
-	panic("NYI")
+func (s *Spline) IntAll(lows, highs []float64, out ...[]float64) []float64 {
+	if len(lows) != len(highs) {
+		panic(fmt.Sprintf("len(lows) = %d, but len(highs) = %d",
+			len(lows), len(highs)))
+	}
+
+	var intOut []float64
+	if len(out) == 0 {
+		intOut = make([]float64, len(lows))
+	} else {
+		for i := range out {
+			if len(out[i]) != len(lows) {
+				panic(fmt.Sprintf("len(lows) = %d, but len(out[%d]) = %d",
+					len(lows), i, len(out[i])))
+			}
+		}
+		intOut = out[0]
+	}
+
+	for i := range intOut { intOut[i] = s.Int(lows[i], highs[i]) }
+
+	if len(out) > 1 {
+		for i := range out[1:] { copy(out[i], intOut) }
+	}
+	return intOut
 }
 
 type splineOption func(*Spline)
@@ -256,9 +301,11 @@ func SplineBounds(lower, upper float64) SplineOption {
 	return func(s *Spline) { s.dy2Low, s.dy2High = lower, upper	}
 }
 
-// AccelInt sets whether or not to aggressively optimizae integral calls at
-// the expense of slightly increased memory consumption. By default it is set
-// to true.
+// AccelInt sets whether or not to perform certain optimizations on integral
+// calls at the expense of increased memory consumption and Spline
+// initialization time. With this option set, calls to Int are O(1). Without
+// this option set, calls to Int that span N intervals take O(N) time. By
+// default, it is set to true.
 func AccelInt(accelInt bool) SplineOption {
 	return func(s *Spline) { s.accelInt = accelInt }
 }
