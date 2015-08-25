@@ -68,7 +68,7 @@ func NewSpline(xs, ys []float64, opts ...SplineOption) *Spline {
 //
 //     AccelInt
 //     CopyInput
-func Reuse(xs, ys []float64, opts ...SplineOption) {
+func (s *Spline) Reuse(xs, ys []float64, opts ...SplineOption) {
 	panic("NYI")
 }
 
