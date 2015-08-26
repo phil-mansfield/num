@@ -39,6 +39,7 @@ type Spline struct {
 	copyInput, unif, strict, accelInt bool
 	dx float64
 
+	// intSum[i] = \int_xs[0]^xs[i] dx S(x)
 	intSum []float64
 }
 
@@ -85,12 +86,12 @@ func NewSpline(xs, ys []float64, opts ...SplineOption) *Spline {
 	s.dy2s = make([]float64, n)
 	s.coeffs = make([]coeff, n - 1)
 	if s.accelInt {
-		s.intSum = make([]float64, n - 1)
+		s.intSum = make([]float64, n)
 	}
 
 	s.calcY2s(ys)
 	s.calcCoeffs(ys)
-
+	if s.accelInt { s.precomputeInt() }
 	return s
 }
 
@@ -137,6 +138,7 @@ func (s *Spline) Reuse(xs, ys []float64, opts ...SplineOption) {
 
 	s.calcY2s(ys)
 	s.calcCoeffs(ys)
+	if s.accelInt { s.precomputeInt() }
 }
 
 func isIncr(xs []float64) bool {
@@ -152,6 +154,14 @@ func (s *Spline) calcY2s(ys []float64) {
 
 func (s *Spline) calcCoeffs(ys []float64) {
 	panic("NYI")
+}
+
+func (s *Spline) precomputeInt() {
+	s.intSum[0] = 0
+	for i := 1; i < len(s.intSum); i++ {
+		s.intSum[i]  = s.intSum[i - 1] +
+			intTerm(&s.coeffs[i - 1], s.xs[i - 1], s.xs[i])
+	}
 }
 
 // LowerBound returns the lowest value which is within range for the spline.
@@ -274,24 +284,24 @@ func (s *Spline) DerivAll(xs []float64, order int, out ...[]float64) []float64 {
 func (s *Spline) Int(low, high float64) float64 {
 	iLow, iHigh := s.bsearch(low), s.bsearch(high)
 	if iLow == iHigh {
-		return integTerm(&s.coeffs[iLow], low, high)
+		return intTerm(&s.coeffs[iLow], low, high)
 	}
 
-	sum := integTerm(&s.coeffs[iLow], low, s.xs[iLow+1]) +
-		integTerm(&s.coeffs[iHigh], s.xs[iHigh], high)
+	sum := intTerm(&s.coeffs[iLow], low, s.xs[iLow+1]) +
+		intTerm(&s.coeffs[iHigh], s.xs[iHigh], high)
 
 	if s.accelInt {
 		sum += s.intSum[iHigh - 1] - s.intSum[iLow]
 	} else {
 		for i := iLow + 1; i < iHigh; i++ {
-			sum += integTerm(&s.coeffs[i], s.xs[i], s.xs[i+1])
+			sum += intTerm(&s.coeffs[i], s.xs[i], s.xs[i+1])
 		}
 	}
 
 	return sum
 }
 
-func integTerm(coeff *coeff, lo, hi float64) float64 {
+func intTerm(coeff *coeff, lo, hi float64) float64 {
 	a, b, c, d := coeff.a, coeff.b, coeff.c, coeff.d
 	dx := hi - lo
 	return a*dx*dx*dx*dx/4 + b*dx*dx*dx/3 + c*dx*dx/2 + d*dx
