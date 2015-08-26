@@ -35,6 +35,7 @@ type Spline struct {
 	cache int
 	
 	// Optional params:
+	reuse bool
 	copyInput, unif, strict, accelInt bool
 	dx float64
 
@@ -46,7 +47,7 @@ type coeff struct {
 }
 
 // NewSpline creates a new interpolating spline corresponding to the given
-// points. If these points are not sorted in ascending  order, the function
+// points. If the x values are not in strictly increasing order, the function
 // will panic.
 //
 // Additional customization options can be provided as variadic arguments.
@@ -54,21 +55,102 @@ type coeff struct {
 //
 //     xs, ys := getMyData()
 //     sp := NewSpline(
-//         xs, ys, SplineBounds(Deriv(-7), Deriv2(+1)), AccelInt(false),
+//         xs, ys, SplineBounds(-7, +1), AccelInt(false),
 //     )
 func NewSpline(xs, ys []float64, opts ...SplineOption) *Spline {
-	panic("NYI")
+	if len(xs) != len(ys) {
+		panic(fmt.Sprintf("len(xs) = %d, but len(ys) = %d", len(xs), len(ys)))
+	} else if len(xs) <= 1 {
+		panic(fmt.Sprintf("len(xs) <= 1"))
+	} else if !isIncr(xs) {
+		panic("xs is not strictly increasing.")
+	}
+
+	// Setting params
+	s := &Spline{
+		copyInput: true, strict: true, unif: false,
+		accelInt: true,
+	}
+	for _, opt := range opts { opt(s) }
+	if s.unif { s.dx = (xs[len(xs) - 1] - xs[0]) / float64(len(xs) - 1) }
+
+	// Allocations
+	n := len(xs)
+	if s.copyInput {
+		s.xs = make([]float64, n)
+		copy(s.xs, xs)
+	} else {
+		s.xs = xs
+	}
+	s.dy2s = make([]float64, n)
+	s.coeffs = make([]coeff, n - 1)
+	if s.accelInt {
+		s.intSum = make([]float64, n - 1)
+	}
+
+	s.calcY2s(ys)
+	s.calcCoeffs(ys)
+
+	return s
 }
 
-// Reuse reuses Spline for a new set of data without doing any additional
-// allocations.
+// Reuse reuses Spline for a new set of data without making any more permanent
+// heap allocations.
 //
-// SplineOptions which change the the underlying allocation scheme of the Spline
-// cannot be used:
+// SplineOptions which change the the underlying allocation scheme of the
+// Spline cannot be used:
 //
 //     AccelInt
 //     CopyInput
+//
+// All other options reset to their default values if not used.
 func (s *Spline) Reuse(xs, ys []float64, opts ...SplineOption) {
+	if len(xs) != len(ys) {
+		panic(fmt.Sprintf("len(xs) = %d, but len(ys) = %d", len(xs), len(ys)))
+	} else if len(xs) != len(s.xs) {
+		panic(fmt.Sprintf(
+			"len(xs) = %d, but spline's internals have length %d.",
+			len(xs), len(s.xs),
+		))
+	} else if !isIncr(xs) {
+		panic("xs is not sctrictly increasing.")
+	}
+
+
+	s.reuse = true
+	s.strict = true
+	s.unif = false
+	for _, opt := range opts { opt(s) }
+	panic("NYI")
+
+	// Clear buffers.
+	if s.copyInput {
+		copy(s.xs, xs)
+	} else {
+		s.xs = xs
+	}
+	for i := range s.dy2s { s.dy2s[i] = 0 }
+	for i := range s.coeffs { s.coeffs[i] = coeff{} }
+	if s.accelInt {
+		for i := range s.intSum { s.intSum[i] = 0 }
+	}
+
+	s.calcY2s(ys)
+	s.calcCoeffs(ys)
+}
+
+func isIncr(xs []float64) bool {
+	for i := 1; i < len(xs); i++ {
+		if xs[i] <= xs[i + 1] { return false }
+	}
+	return true
+}
+
+func (s *Spline) calcY2s(ys []float64) {
+	panic("NYI")
+}
+
+func (s *Spline) calcCoeffs(ys []float64) {
 	panic("NYI")
 }
 
@@ -250,7 +332,23 @@ type splineOption func(*Spline)
 
 // A cached binary search.
 func (s *Spline) bsearch(x float64) int {
+	// TODO: benchmark whether this should go before or after the cache check.
+	if s.unif {
+		if s.strict {
+			if s.xs[0] > x || s.xs[len(s.xs) - 1] < x {
+				panic(fmt.Sprintf(
+					"%g is out of bounds for Spline with bounds [%g, %g]",
+					x, s.LowerBound(), s.UpperBound(),
+				))
+			}
+		}
+		return int((x - s.xs[0]) / s.dx)
+	}
+
 	// Check the bsearch cache.
+	// TODO: benchmark whether checking the adjacent intervals is worth it.
+	// In the average case, the user is just iterating across a range, so
+	// we could actually avoid all but the first bianry searches.
 	var low, high int
 	n := s.Intervals()
 	if s.xs[s.cache] <= x {
@@ -307,13 +405,18 @@ func SplineBounds(lower, upper float64) SplineOption {
 // this option set, calls to Int that span N intervals take O(N) time. By
 // default, it is set to true.
 func AccelInt(accelInt bool) SplineOption {
-	return func(s *Spline) { s.accelInt = accelInt }
+	return func(s *Spline) {
+		if s.reuse {
+			panic("Cannot set AccelInt option for calls to Spline.Reuse().")
+		}
+		s.accelInt = accelInt
+	}
 }
 
-// Unif tells the spline that the input x values are uniformly spaces with
-// distance dx.
-func Unif(dx float64) SplineOption {
-	return func(s *Spline) { s.unif, s.dx = true, dx }
+// Unif tells the spline that the input x values are uniformly spaced. If set
+// to true, random access time is reduced.
+func Unif(unif bool) SplineOption {
+	return func(s *Spline) { s.unif = unif }
 }
 
 // CopyInput sets whether or not to explicitly allocate and copy the input
@@ -321,5 +424,10 @@ func Unif(dx float64) SplineOption {
 // is a concern and the input slices are not modified over the lifetime of the
 // spline.
 func CopyInput(copyInput bool) SplineOption {
-	return func(s *Spline) { s.copyInput = copyInput }
+	return func(s *Spline) {
+		if s.reuse {
+			panic("Cannot set CopyInput option for calls to Spline.Reuse().")
+		}
+		s.copyInput = copyInput
+	}
 }
